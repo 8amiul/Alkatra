@@ -28,3 +28,5 @@ extern const unsigned char image_phone_book_open_bits[] U8X8_PROGMEM;
 extern const unsigned char image_select_bits[] U8X8_PROGMEM;
 
 extern const unsigned char image_close_bits[] U8X8_PROGMEM;
+extern const unsigned char image_volume_ending_point_bits[] U8X8_PROGMEM;
+extern const unsigned char image_boot_logo_bits[] U8X8_PROGMEM;

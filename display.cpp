@@ -85,6 +85,7 @@ void DRAW_BOOT_LOGO(void) {
     u8g2.clearBuffer();
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
+    /*
     // Layer 2
     u8g2.setFont(u8g2_font_timR24_tr);
     u8g2.drawStr(19, 44, "alkatra");
@@ -92,7 +93,9 @@ void DRAW_BOOT_LOGO(void) {
     // Layer 2
     u8g2.setFont(u8g2_font_timR10_tr);
     u8g2.drawStr(61, 56, "Console");
+    */
 
+    u8g2.drawXBMP(4, 10, 120, 44, image_boot_logo_bits);
     u8g2.sendBuffer();
 }
 

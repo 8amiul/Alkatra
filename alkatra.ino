@@ -9,6 +9,7 @@
 void setup() {
   Serial.begin(9600);
   softwareSerial.begin(9600);
+  
   u8g2.begin();
   DF_PLAYER_INIT();
   DRAW_BOOT_LOGO();
@@ -17,8 +18,9 @@ void setup() {
   BUTTON_SETUP();
 }
 
-unsigned long lastTime = 0;
-const unsigned long interval = 500;
+static unsigned long lastTime = 0;
+static const unsigned long interval = 500;
+
 
 void loop() {
   DRAW_SCREEN();
@@ -30,7 +32,13 @@ void loop() {
   if (currentTime - lastTime >= interval) {
     lastTime = currentTime;
     checkMusicDonePlaying();
-    DEBUG_MUSIC();
-    Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
+    //DEBUG_MUSIC();
+    
+    //setVolume();
+    //musicLoop();
+    //Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
+    //Serial.printf("RAW: %d\n",analogRead(POTENTIOMETER));
+    Serial.printf("1: %d\n2: %d\n3: %d\n==============", digitalRead(BUTTON_1), digitalRead(BUTTON_2), digitalRead(BUTTON_3));
   }
+  
 }

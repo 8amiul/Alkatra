@@ -4,8 +4,8 @@
 #include "SoftwareSerial.h"
 #include <TimeLib.h>
 
-char* ssid     = "ssid";
-char* password = "pass";
+char* ssid     = "/home/8amiul/";
+char* password = "#1992470";
 
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 21600;
