@@ -8,9 +8,11 @@ constexpr uint8_t BUTTON_3 = 27;
 constexpr uint8_t BUTTON_4 = 14;
 constexpr uint8_t BUTTON_5 = 13;
 
-constexpr uint8_t POTENTIOMETER = 34;
+constexpr uint8_t POTENTIOMETER_PIN = 34;
 constexpr uint16_t POT_MAX = 4095;
 constexpr uint16_t POT_MIN = 0;
+extern int last_volume_pot_value;
+
 constexpr int BUTTON_PRESS_DELAY = 30;
 
 struct Button_struct {

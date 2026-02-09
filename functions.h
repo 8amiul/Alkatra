@@ -1,5 +1,5 @@
 #pragma once
-
+#include <stddef.h>
 extern char* ssid;
 extern char* password;
 
@@ -21,3 +21,5 @@ void wifi_connect(void);
 int date_allocation(void);
 void get_time();
 //void mkTimeDateDisplayString();
+void sToHMSstring(unsigned long sec, char *buf, size_t buf_size);
+void sToMSstring(unsigned long sec, char *buf, size_t buf_size);

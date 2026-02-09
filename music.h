@@ -14,7 +14,7 @@ extern SoftwareSerial softwareSerial;
 extern DFRobotDFPlayerMini myDFPlayer;
 
 extern int music_volume;
-extern int last_pot_value;
+extern int last_volume_pot_value;
 
 enum MUSIC_BUTTONS {SHUFFLE, PREV, PAUSE_PLAY, NEXT, LOOP, LIST, CLOSE};
 enum MUSIC_READ_STATE {STOPPED = 512, PLAYING = 513, PAUSED = 514, ERROR = -1};
@@ -26,4 +26,4 @@ int checkMusicDonePlaying();
 void setCurrentPlayingMusic(bool incr);
 void setVolume();
 void musicLoop();
-void trackMusicProgress();
+void musicProgressTimeHandle();

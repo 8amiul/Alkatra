@@ -26,19 +26,21 @@ void loop() {
   DRAW_SCREEN();
   BUTTON_LOGIC();
   get_time();
+  musicProgressTimeHandle();
 
   // Loop for blocking function
   unsigned long currentTime = millis();
   if (currentTime - lastTime >= interval) {
     lastTime = currentTime;
     checkMusicDonePlaying();
-    //DEBUG_MUSIC();
+    DEBUG_MUSIC();
+    setVolume();
     
     //setVolume();
     //musicLoop();
     //Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
     //Serial.printf("RAW: %d\n",analogRead(POTENTIOMETER));
-    Serial.printf("1: %d\n2: %d\n3: %d\n==============", digitalRead(BUTTON_1), digitalRead(BUTTON_2), digitalRead(BUTTON_3));
+    //Serial.printf("1: %d\n2: %d\n3: %d\n==============\n", digitalRead(BUTTON_1), digitalRead(BUTTON_2), digitalRead(BUTTON_3));
   }
   
 }

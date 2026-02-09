@@ -3,7 +3,7 @@
 #include "display.h"
 #include "music.h"
 
-
+int last_volume_pot_value;
 void BUTTON_SETUP() {
   // Setting button output to INPUT_PULLOUT
   pinMode(BUTTON_1, INPUT_PULLUP);
@@ -14,7 +14,8 @@ void BUTTON_SETUP() {
 
   //last_pot_value = analogRead(POTENTIOMETER);
   //pinMode(POTENTIOMETER, INPUT);
-  //analogSetPinAttenuation(POTENTIOMETER, ADC_11db);
+  analogSetPinAttenuation(POTENTIOMETER_PIN, ADC_11db);
+  last_volume_pot_value = analogRead(POTENTIOMETER_PIN);
 }
 
 /*
@@ -85,7 +86,7 @@ void MENU_BUTTON_LOGIC(struct Button_struct* Button) {
       app_marker_pos--;
       app_index--;
     }
-    Serial.printf("btn1 pressed, app_marker_pos: %d | app_index: %d\n", app_marker_pos, app_index);
+    //Serial.printf("btn1 pressed, app_marker_pos: %d | app_index: %d\n", app_marker_pos, app_index);
     Button->lastBtn1Time = now;
   }
 
@@ -94,7 +95,7 @@ void MENU_BUTTON_LOGIC(struct Button_struct* Button) {
       app_marker_pos++;
       app_index++;
     }
-    Serial.printf("btn2 pressed, app_marker_pos: %d | app_index: %d\n", app_marker_pos, app_index);
+    //Serial.printf("btn2 pressed, app_marker_pos: %d | app_index: %d\n", app_marker_pos, app_index);
     Button->lastBtn2Time = now;
   }
 

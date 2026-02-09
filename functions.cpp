@@ -3,6 +3,7 @@
 #include "time.h"
 #include "SoftwareSerial.h"
 #include <TimeLib.h>
+#include <stddef.h>
 
 char* ssid     = "/home/8amiul/";
 char* password = "#1992470";
@@ -84,4 +85,20 @@ int date_allocation(void) {
    return 1;
 }
 
+void sToHMSstring(unsigned long sec, char *buf, size_t buf_size)
+{
+    unsigned long h = sec / 3600;
+    unsigned long m = (sec % 3600) / 60;
+    unsigned long s = sec % 60;
+
+    snprintf(buf, buf_size, "%02lu:%02lu:%02lu", h, m, s);
+}
+
+void sToMSstring(unsigned long sec, char *buf, size_t buf_size)
+{
+    unsigned long m = sec / 60;
+    unsigned long s = sec % 60;
+
+    snprintf(buf, buf_size, "%02lu:%02lu", m, s);
+}
 
