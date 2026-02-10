@@ -20,6 +20,7 @@ void DRAW_SCREEN() {
             DRAW_MENU();
             break;
         case MUSIC:
+        if (isDFPlayerFailed != 1)
             DRAW_MUSIC_UI();
             break;
         default:

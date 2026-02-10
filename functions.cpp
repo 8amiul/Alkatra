@@ -6,7 +6,7 @@
 #include <stddef.h>
 
 char* ssid     = "/home/8amiul/";
-char* password = "#";
+char* password = "#1992470";
 
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 21600;
@@ -101,5 +101,4 @@ void sToMSstring(unsigned long sec, char *buf, size_t buf_size)
 
     snprintf(buf, buf_size, "%02lu:%02lu", m, s);
 }
-
 

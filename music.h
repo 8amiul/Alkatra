@@ -3,7 +3,7 @@
 #include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
 
-constexpr uint8_t DEFAULT_VOLUME =  15;
+constexpr uint8_t DEFAULT_VOLUME =  8;
 constexpr uint8_t MAX_VOLUME = 22;
 constexpr uint8_t MIN_VOLUME = 0;
 constexpr uint8_t PIN_MP3_TX = 17; // Connects to module's RX 
@@ -15,7 +15,8 @@ extern DFRobotDFPlayerMini myDFPlayer;
 
 extern int music_volume;
 extern int last_volume_pot_value;
-
+extern bool isPausedInternal;
+extern int isDFPlayerFailed;
 enum MUSIC_BUTTONS {SHUFFLE, PREV, PAUSE_PLAY, NEXT, LOOP, LIST, CLOSE};
 enum MUSIC_READ_STATE {STOPPED = 512, PLAYING = 513, PAUSED = 514, ERROR = -1};
 void MUSIC_BUTTON_LOGIC(struct Button_struct* Button);

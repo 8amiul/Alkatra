@@ -11,6 +11,7 @@ extern int total_apps;
 extern int app_marker_pos;
 extern int app_index;
 
+
 void DRAW_HOME_UI(void);
 void DRAW_BOOT_LOGO(void);
 

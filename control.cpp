@@ -100,6 +100,12 @@ void MENU_BUTTON_LOGIC(struct Button_struct* Button) {
   }
 
   if (Button->btn3 == LOW && now - Button->lastBtn3Time >= BUTTON_PRESS_DELAY) {
+
+    if (app_index == MUSIC_APP && isDFPlayerFailed == 1) {
+      Button->lastBtn3Time = now;
+      return;
+    }
+
     current_scr = app_index+2;
     
     Button->lastBtn3Time = now;

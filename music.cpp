@@ -15,7 +15,7 @@
 SoftwareSerial softwareSerial(PIN_MP3_RX, PIN_MP3_TX);
 
 DFRobotDFPlayerMini myDFPlayer;
-
+int isDFPlayerFailed = 0;
 int select_music_button_pos = 2;      // the default position where the selector would be is on the play/pause button
 int total_buttons = 7;
 bool isShuffle = 0;
@@ -24,6 +24,7 @@ int currentPlayingMusic = 139;
 int STATE = STOPPED;
 bool isMusicDonePlaying = 0;
 int music_volume = DEFAULT_VOLUME;
+
 bool musicHasBeenPlayed = 0;
 
 void musicLoop() {
@@ -34,8 +35,9 @@ void musicLoop() {
 
 void DEBUG_MUSIC() {
   Serial.println("----- DEBUG -----!");
-  Serial.printf("State: %d\n",myDFPlayer.readState()); //read mp3 state
-  Serial.printf("Current Music File: %d | STATE (VAR): %d | DONE: %d | BUSY_PIN: %d | isFinished: %d | VOL: %d\n", currentPlayingMusic, STATE, isMusicDonePlaying, digitalRead(BUSY_PIN), myDFPlayer.readType(), music_volume);
+  //Serial.printf("State: %d\n",myDFPlayer.readState()); //read mp3 state
+  Serial.printf("Current Music File: %d | STATE (VAR): %d | DONE: %d | BUSY_PIN: %d | VOL: %d | isPaused: %d | isFailed: %d\n", currentPlayingMusic, STATE, isMusicDonePlaying, digitalRead(BUSY_PIN), music_volume, isPausedInternal
+  , isDFPlayerFailed);
   //Serial.println(myDFPlayer.readVolume()); //read current volume
   //Serial.printf("EQ: %d\n", myDFPlayer.readEQ()); //read EQ setting
   //Serial.println(myDFPlayer.readFileCounts()); //read all file counts in SD card
@@ -44,17 +46,26 @@ void DEBUG_MUSIC() {
 
 }
 
-void DF_PLAYER_INIT() {
+void DF_PLAYER_INIT() {  
+  pinMode(BUSY_PIN, INPUT);
+  int initial_time = millis();
+
+  while ((millis() - initial_time) <= 200) {
+    if (digitalRead(BUSY_PIN) == LOW) {
+      isDFPlayerFailed = 1;
+      break;
+    }
+  }
   if (myDFPlayer.begin(softwareSerial, true, false)) {
     Serial.println("DF_PLAYER_SOFTWARE_SERIAL_OK");
-    setVolume();
+    myDFPlayer.volume(music_volume);
     myDFPlayer.EQ(DFPLAYER_EQ_BASS);
     //myDFPlayer.enableLoopAll();
     //Serial.println(myDFPlayer.readFileCounts());
   } else {
     Serial.println("Connecting to DFPlayer Mini failed!");
+    isDFPlayerFailed = 1;
   }
-  pinMode(BUSY_PIN, INPUT);
 }
 
 unsigned long musicStartMillis = 0;
@@ -65,7 +76,7 @@ bool isPausedInternal = false;
 void musicProgressTimeHandle() {
   if (musicHasBeenPlayed && STATE == PLAYING && !isPausedInternal) {
       musicElapsedTime = (millis() - musicStartMillis) / 1000;
-      Serial.println(musicElapsedTime);
+      //Serial.println(musicElapsedTime);
   }
   
 }
@@ -149,16 +160,41 @@ void setTrackArtist() {
 
 
 // --------------------- Volume section -----------------------------
+/*
 void setVolume() {
   int new_pot_value = analogRead(POTENTIOMETER_PIN);
-  if (abs(new_pot_value - last_volume_pot_value) > 50) {  // dead zone
+  if (abs(new_pot_value - last_volume_pot_value) > 250) {  // dead zone
     last_volume_pot_value = new_pot_value;
+    int map_volume = map(new_pot_value, 0, 4095, MIN_VOLUME, MAX_VOLUME);
+    
+    if (music_volume != map_volume) {
+      music_volume = map_volume;
+      //myDFPlayer.volume(music_volume);
+    }
+    Serial.printf("music_vol: %d, map_vol: %d\n", music_volume, map_volume);
+  }
+  
+}
+*/
+
+void setVolume() {
+  static unsigned long lastRead = 0;
+  if (millis() - lastRead < 500) return; 
+  lastRead = millis();
+
+  int new_pot_value = analogRead(POTENTIOMETER_PIN);
+
+  if (abs(new_pot_value - last_volume_pot_value) > 250) {
+    last_volume_pot_value = new_pot_value;
+
     int map_volume = map(new_pot_value, 0, 4095, MIN_VOLUME, MAX_VOLUME);
 
     if (music_volume != map_volume) {
-      music_volume = map_volume;
+      music_volume = constrain(map_volume, MIN_VOLUME, MAX_VOLUME);
       myDFPlayer.volume(music_volume);
     }
+
+    Serial.printf("music_vol: %d\n", music_volume);
   }
 }
 
@@ -348,6 +384,8 @@ void setCurrentPlayingMusic(bool incr) {
 }
 
 void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
+  if (isDFPlayerFailed == 1) return;
+
   if (Button->btn1 == LOW) {
     select_music_button_pos--;
     if (select_music_button_pos <= -1)
@@ -374,15 +412,17 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
         }
         break;
       case PREV:
+        if (musicHasBeenPlayed == false || isDFPlayerFailed == 1) return;
         myDFPlayer.previous();
         setCurrentPlayingMusic(0);
+        STATE = PLAYING;
         while(digitalRead(BUSY_PIN) == HIGH);
         musicStartMillis = millis();
-        musicHasBeenPlayed = 1;
+        isPausedInternal = false;
         break;
       case PAUSE_PLAY:
+        if (isDFPlayerFailed == 1) return;
         if (STATE == STOPPED) {
-          //myDFPlayer.loopFolder(1);
           musicHasBeenPlayed = 1;
           myDFPlayer.play(currentPlayingMusic);
           
@@ -408,16 +448,19 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
         }
         break;
       case NEXT:
+        if (musicHasBeenPlayed == false || isDFPlayerFailed == 1) return;
         myDFPlayer.next();
         setCurrentPlayingMusic(1);
-        while (digitalRead(BUSY_PIN) == HIGH);
+        STATE = PLAYING;
+        while(digitalRead(BUSY_PIN) == HIGH);
         musicStartMillis = millis();
+        isPausedInternal = false;
         break;
       case LOOP:
          myDFPlayer.enableLoop();
         break;
       case LIST:
-
+        
         break;
       case CLOSE:
         current_scr = MENU;
@@ -429,4 +472,3 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
   }
 
 }
-
