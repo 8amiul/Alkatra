@@ -6,7 +6,7 @@
 #include "esp_system.h"
 
 char* ssid     = "/home/8amiul/";
-char* password = "#1992470";
+char* password = "#1992470";        // yeah, my wifi password.
 
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 21600;
@@ -114,4 +114,5 @@ void shuffle(int *array, int n) {
             array[j] = temp;
         }
     }
+
 }
