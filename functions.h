@@ -16,7 +16,7 @@ extern int isTimeSet;
 extern const char* months[];
 
 
-
+void shuffle(int *array, int n);
 void wifi_connect(void);
 int date_allocation(void);
 void get_time();

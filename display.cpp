@@ -13,19 +13,20 @@ int app_marker_pos = 0;
 void DRAW_SCREEN() {
     DRAW_NAVBAR();
     switch (current_scr) {
-        case HOME:
-            DRAW_HOME_UI();
+        case HOME: DRAW_HOME_UI(); break;
+        case MENU: DRAW_MENU(); break;
+
+        case MUSIC: if (isDFPlayerFailed != 1) DRAW_MUSIC_UI(); break;
+            case MUSIC_SCREEN_EQ:
+                drawMusicEQ();
             break;
-        case MENU:
-            DRAW_MENU();
+            case MUSIC_SCREEN_SONG_LIST:
             break;
-        case MUSIC:
-        if (isDFPlayerFailed != 1)
-            DRAW_MUSIC_UI();
+            case MUSIC_SCREEN_VISUALIZER:
+                drawMusicVisualizer();
             break;
-        default:
-            DRAW_HOME_UI();
-            break;
+
+        default: DRAW_HOME_UI(); break;
     }
 }
 

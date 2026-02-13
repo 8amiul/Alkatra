@@ -2,8 +2,8 @@
 #include <WiFi.h>
 #include "time.h"
 #include "SoftwareSerial.h"
-#include <TimeLib.h>
 #include <stddef.h>
+#include "esp_system.h"
 
 char* ssid     = "/home/8amiul/";
 char* password = "#1992470";
@@ -102,3 +102,16 @@ void sToMSstring(unsigned long sec, char *buf, size_t buf_size)
     snprintf(buf, buf_size, "%02lu:%02lu", m, s);
 }
 
+void shuffle(int *array, int n) {
+    if (n > 1) {
+        for (int i = n - 1; i > 0; i--) {
+            // Pick a random index from 0 to i
+            int j = esp_random() % (i + 1);
+            
+            // Swap array[i] with the element at random index
+            int temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+}

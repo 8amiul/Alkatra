@@ -30,3 +30,17 @@ extern const unsigned char image_select_bits[] U8X8_PROGMEM;
 extern const unsigned char image_close_bits[] U8X8_PROGMEM;
 extern const unsigned char image_volume_ending_point_bits[] U8X8_PROGMEM;
 extern const unsigned char image_boot_logo_bits[] U8X8_PROGMEM;
+extern const unsigned char image_settings_bits[] U8X8_PROGMEM;
+
+//MUSCI_EQ
+extern const unsigned char image_down_bits[] U8X8_PROGMEM;
+extern const unsigned char image_down_hvr_bits[] U8X8_PROGMEM;
+extern const unsigned char image_KeySave_1_bits[] U8X8_PROGMEM;
+extern const unsigned char image_KeySaveSelected_bits[] U8X8_PROGMEM;
+extern const unsigned char image_Space_bits[] U8X8_PROGMEM;
+extern const unsigned char image_Up_bits[] U8X8_PROGMEM;
+extern const unsigned char image_Up_hvr_bits[] U8X8_PROGMEM;
+extern const unsigned char image_eq_name_border_bits[] U8X8_PROGMEM;
+extern const unsigned char image_save_button_1_bits[] U8X8_PROGMEM;
+extern const unsigned char image_save_button_hvr_bits[] U8X8_PROGMEM;
+extern const unsigned char image_close_hvr_bits[] U8X8_PROGMEM;

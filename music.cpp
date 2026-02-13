@@ -17,27 +17,32 @@ SoftwareSerial softwareSerial(PIN_MP3_RX, PIN_MP3_TX);
 DFRobotDFPlayerMini myDFPlayer;
 int isDFPlayerFailed = 0;
 int select_music_button_pos = 2;      // the default position where the selector would be is on the play/pause button
-int total_buttons = 7;
-bool isShuffle = 0;
+int TOTAL_MUSIC_BUTTONS = 8;
+
 bool isPaused = -1;
-int currentPlayingMusic = 139;
+int currentPlayingMusic = 166;
 int STATE = STOPPED;
 bool isMusicDonePlaying = 0;
 int music_volume = DEFAULT_VOLUME;
 
 bool musicHasBeenPlayed = 0;
 
-void musicLoop() {
-  checkMusicDonePlaying();
-  DEBUG_MUSIC();
-  //setVolume();
-}
+bool isLoop = 0;
+
+int playShuffleQueue[SONG_COUNT];
+bool isShuffle = 0;
+int shuffleQueueCurrentIndex = 0;
+int shuffleQueueNextIndex = 0;
+
+
+int currentEQ = NORMAL_EQ;
 
 void DEBUG_MUSIC() {
   Serial.println("----- DEBUG -----!");
   //Serial.printf("State: %d\n",myDFPlayer.readState()); //read mp3 state
   Serial.printf("Current Music File: %d | STATE (VAR): %d | DONE: %d | BUSY_PIN: %d | VOL: %d | isPaused: %d | isFailed: %d\n", currentPlayingMusic, STATE, isMusicDonePlaying, digitalRead(BUSY_PIN), music_volume, isPausedInternal
   , isDFPlayerFailed);
+
   //Serial.println(myDFPlayer.readVolume()); //read current volume
   //Serial.printf("EQ: %d\n", myDFPlayer.readEQ()); //read EQ setting
   //Serial.println(myDFPlayer.readFileCounts()); //read all file counts in SD card
@@ -56,12 +61,16 @@ void DF_PLAYER_INIT() {
       break;
     }
   }
+
   if (myDFPlayer.begin(softwareSerial, true, false)) {
     Serial.println("DF_PLAYER_SOFTWARE_SERIAL_OK");
     myDFPlayer.volume(music_volume);
-    myDFPlayer.EQ(DFPLAYER_EQ_BASS);
+    myDFPlayer.EQ(currentEQ);
     //myDFPlayer.enableLoopAll();
-    //Serial.println(myDFPlayer.readFileCounts());
+
+    for (int i = 0; i < SONG_COUNT; i++) 
+      playShuffleQueue[i] = i + 1;
+
   } else {
     Serial.println("Connecting to DFPlayer Mini failed!");
     isDFPlayerFailed = 1;
@@ -73,12 +82,12 @@ unsigned long musicPausedMillis = 0;
 unsigned long musicElapsedTime = 0;
 bool isPausedInternal = false;
 
+
 void musicProgressTimeHandle() {
   if (musicHasBeenPlayed && STATE == PLAYING && !isPausedInternal) {
       musicElapsedTime = (millis() - musicStartMillis) / 1000;
       //Serial.println(musicElapsedTime);
   }
-  
 }
 
 
@@ -266,7 +275,9 @@ void DRAW_MUSIC_UI(void) {
     }
 
 
-
+    // settings
+    u8g2.setDrawColor(2);
+    u8g2.drawXBMP(118, 24, 7, 9, image_settings_bits);
 
     // music_previous
     u8g2.drawXBMP(25, 51, 8, 8, image_music_previous_bits);
@@ -274,12 +285,20 @@ void DRAW_MUSIC_UI(void) {
     // music_next
     u8g2.drawXBMP(57, 51, 8, 8, image_music_next_bits);
 
-    // operation_undo
+    // loop
     u8g2.drawXBMP(73, 51, 6, 8, image_operation_undo_bits);
+    // loop_on bar
+    if (isLoop == 1)
+      u8g2.drawFrame(69, 61, 14, 2);
+
+
 
     // shuffle
     u8g2.drawXBMP(4, 50, 13, 11, image_shuffle_bits);
-
+    // shuffle_on bar
+    if (isShuffle == 1) {
+      u8g2.drawFrame(3, 61, 15, 2);
+    }
 
     // progress-bar
     int cappedMusicElapsedTime = constrain(musicElapsedTime, 0, songs[currentPlayingMusic-1].length);
@@ -335,6 +354,9 @@ void DRAW_MUSIC_UI(void) {
       case LIST:
         u8g2.drawBox(84, 50, 12, 11);
         break;
+      case EQ:
+        u8g2.drawBox(115, 23, 12, 11);
+        break;
       case CLOSE:
         u8g2.drawBox(115, 11, 12, 8);
         break;
@@ -346,16 +368,50 @@ void DRAW_MUSIC_UI(void) {
     u8g2.sendBuffer();
 }
 
+void handleShuffle() {
+  if (shuffleQueueCurrentIndex == 0 && shuffleQueueNextIndex == 0) {
+    myDFPlayer.play(playShuffleQueue[shuffleQueueCurrentIndex]);
+    shuffleQueueNextIndex++;
+    currentPlayingMusic = playShuffleQueue[shuffleQueueCurrentIndex];
+    //Serial.printf("Playing Music: %d\n", playShuffleQueue[shuffleQueueCurrentIndex]);
+  }
+  else { 
+    shuffleQueueCurrentIndex = shuffleQueueNextIndex;
+    myDFPlayer.play(playShuffleQueue[shuffleQueueCurrentIndex]);
+    //Serial.printf("Playing Music: %d | Next music: %d\n", playShuffleQueue[shuffleQueueCurrentIndex], playShuffleQueue[shuffleQueueCurrentIndex+1]);
+    currentPlayingMusic = playShuffleQueue[shuffleQueueCurrentIndex];
+    if (shuffleQueueNextIndex+1 >= SONG_COUNT) {
+      shuffle(playShuffleQueue, SONG_COUNT);
+      shuffleQueueCurrentIndex = 0;
+      shuffleQueueNextIndex = 0;
+    }
+    else {
+        shuffleQueueNextIndex++;
+    }
+  }
+}
+
+
 int checkMusicDonePlaying() {
   int busy_pin = digitalRead(BUSY_PIN);
   Serial.println(busy_pin);
 
   if (busy_pin == HIGH && STATE == PLAYING) {
     isMusicDonePlaying = 1;
-    setCurrentPlayingMusic(1);
-    Serial.println("------------ DONE PLAYING --------------");
-    myDFPlayer.next();
-    
+
+    if (isLoop == 1) {
+      myDFPlayer.play(currentPlayingMusic);
+    }
+    else {
+      if (isShuffle != 1) {
+        setCurrentPlayingMusic(1);
+        myDFPlayer.next();
+      }
+      else if (isShuffle == 1) {
+        handleShuffle();
+      }
+    }
+
     while (digitalRead(BUSY_PIN) == HIGH);
     musicStartMillis = millis();
     //STATE = PLAYING;
@@ -363,7 +419,6 @@ int checkMusicDonePlaying() {
   else {
     isMusicDonePlaying = 0;
   }
-
   return STATE;
 }
 
@@ -380,7 +435,6 @@ void setCurrentPlayingMusic(bool incr) {
     else
       currentPlayingMusic--;
   }
-  //Serial.printf("Current music: %d\n",myDFPlayer.readCurrentFileNumber());
 }
 
 void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
@@ -389,22 +443,24 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
   if (Button->btn1 == LOW) {
     select_music_button_pos--;
     if (select_music_button_pos <= -1)
-      select_music_button_pos = 6;
+      select_music_button_pos = TOTAL_MUSIC_BUTTONS-1;
     //delay(BUTTON_PRESS_DELAY);
   }
 
   if (Button->btn2 == LOW) {
     select_music_button_pos++;
-    if (select_music_button_pos >= total_buttons) {
+    if (select_music_button_pos >= TOTAL_MUSIC_BUTTONS) {
       select_music_button_pos = 0;
     }
-    //delay(BUTTON_PRESS_DELAY);
   }
 
   if (Button->btn3 == LOW) {
     switch (select_music_button_pos) {
       case SHUFFLE:
         if (isShuffle == 0) {
+          shuffle(playShuffleQueue, SONG_COUNT);
+          shuffleQueueCurrentIndex = 0;
+          shuffleQueueNextIndex = 0;
           isShuffle = 1;
         }
         else {
@@ -413,8 +469,15 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
         break;
       case PREV:
         if (musicHasBeenPlayed == false || isDFPlayerFailed == 1) return;
-        myDFPlayer.previous();
-        setCurrentPlayingMusic(0);
+        isLoop = 0;
+        if (isShuffle != 1) {
+          myDFPlayer.previous();
+          setCurrentPlayingMusic(0);
+        }
+        else if (isShuffle == 1) {
+          handleShuffle();
+        }
+
         STATE = PLAYING;
         while(digitalRead(BUSY_PIN) == HIGH);
         musicStartMillis = millis();
@@ -448,20 +511,37 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
         }
         break;
       case NEXT:
+        isLoop = 0;
         if (musicHasBeenPlayed == false || isDFPlayerFailed == 1) return;
-        myDFPlayer.next();
-        setCurrentPlayingMusic(1);
+        if (isShuffle != 1) {
+          myDFPlayer.next();
+          setCurrentPlayingMusic(1);
+        }
+        else {
+          handleShuffle();
+        }
+
         STATE = PLAYING;
         while(digitalRead(BUSY_PIN) == HIGH);
         musicStartMillis = millis();
         isPausedInternal = false;
         break;
+
       case LOOP:
-         myDFPlayer.enableLoop();
+         if (isLoop == 1) {
+          isLoop = 0;
+         }
+         else {
+          isLoop = 1;
+         }
         break;
+
       case LIST:
         
         break;
+      case EQ:
+         current_scr = MUSIC_SCREEN_EQ;
+         break;
       case CLOSE:
         current_scr = MENU;
         break;
@@ -471,4 +551,193 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
     //delay(BUTTON_PRESS_DELAY);
   }
 
+  if (Button->btn5 == LOW) {
+    current_scr = MUSIC_SCREEN_VISUALIZER;
+  }
+}
+
+
+int MusicEQ_ButtonPos = EQ_SAVE;
+int MusicEQ_EQcount = 0;
+
+void drawMusicEQ(void) {
+    u8g2.clearBuffer();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+
+    // window_border
+    u8g2.setDrawColor(2);
+    u8g2.drawFrame(0, 10, 128, 54);
+
+    // top-left text
+    u8g2.setDrawColor(1);
+    u8g2.setFont(u8g2_font_timR24_tr);
+    u8g2.drawStr(2, 38, "E");
+    u8g2.setFont(u8g2_font_timR24_tr);
+    u8g2.drawStr(9, 53, "Q");
+
+    if (MusicEQ_ButtonPos == EQ_DOWN)
+      // down_hvr
+      u8g2.drawXBMP(103, 44, 13, 14, image_down_hvr_bits);
+    else 
+      // down
+      u8g2.drawXBMP(103, 43, 13, 14, image_down_bits);
+
+    if (MusicEQ_ButtonPos == EQ_CLOSE)
+      // close_hvr
+      u8g2.drawXBMP(115, 11, 12, 8, image_close_hvr_bits);
+    else 
+      // close
+      u8g2.drawXBMP(115, 11, 12, 8, image_close_bits);
+
+    // Up_hvr
+    if (MusicEQ_ButtonPos == EQ_UP)
+      u8g2.drawXBMP(103, 23, 13, 14, image_Up_hvr_bits);
+    else
+      // Up
+      u8g2.drawXBMP(103, 23, 13, 14, image_Up_bits);
+
+    if (MusicEQ_ButtonPos == EQ_SAVE)
+      // save_button_hvr
+      u8g2.drawXBMP(51, 47, 24, 11, image_save_button_hvr_bits);
+    else
+      // save_button
+      u8g2.drawXBMP(51, 47, 24, 11, image_save_button_1_bits);
+
+    // eq_name_border
+    u8g2.drawXBMP(28, 24, 65, 18, image_eq_name_border_bits);
+
+    // EQ_name
+    u8g2.setFont(u8g2_font_helvB08_tr);
+    switch (MusicEQ_EQcount) {
+      case NORMAL_EQ:
+        u8g2.drawStr(38, 36, "NORMAL");
+        break;
+      case POP_EQ:
+        u8g2.drawStr(51, 36, "POP");  
+        break;
+      case ROCK_EQ:
+        u8g2.drawStr(45, 36, "ROCK");
+        break;
+      case JAZZ_EQ:
+        u8g2.drawStr(47, 36, "JAZZ");
+        break;
+      case CLASSIC_EQ:
+        u8g2.drawStr(38, 36, "CLASSIC");
+        break;
+      case BASS_EQ:
+        u8g2.drawStr(48, 36, "BASS");
+        break;
+      default:
+        u8g2.drawStr(48, 36, "ERROR");
+        break;
+    }
+
+    u8g2.sendBuffer();
+}
+
+void MUSIC_SCREEN_EQ_BUTTON_LOGIC(struct Button_struct* Button) {
+  if (Button->btn4 == LOW) {
+    if (MusicEQ_ButtonPos == EQ_SAVE)
+      MusicEQ_ButtonPos = EQ_BTN_TOTAL;
+    MusicEQ_ButtonPos--;
+  }
+  
+  if (Button->btn5 == LOW) {
+    MusicEQ_ButtonPos++;
+    if (MusicEQ_ButtonPos >= EQ_BTN_TOTAL)
+      MusicEQ_ButtonPos = EQ_SAVE;
+  }
+
+  if (Button-> btn3 == LOW) {
+    switch (MusicEQ_ButtonPos) {
+      case EQ_SAVE:
+        currentEQ = MusicEQ_EQcount;
+        myDFPlayer.EQ(currentEQ);
+        break;
+      case EQ_UP:
+        if (MusicEQ_EQcount == NORMAL_EQ)
+          MusicEQ_EQcount = TOTAL_EQ - 1;
+        MusicEQ_EQcount--;
+        break;
+
+      case EQ_DOWN:
+        MusicEQ_EQcount++;
+        if (MusicEQ_EQcount >= TOTAL_EQ)
+          MusicEQ_EQcount = NORMAL_EQ;
+        break;
+
+      case EQ_CLOSE:
+        current_scr = MUSIC;
+      break;
+
+      default: break;
+    }
+  }
+}
+
+
+
+//========== Wave visualizer ==========
+#define SAMPLES 128
+#define SAMPLE_DELAY  80
+#define DAC_PIN 32
+#define CENTER 1950
+#define GAIN 5
+
+unsigned long lastSampleTime = 0;
+int sampleIndex = 0;
+int samples[SAMPLES];
+
+#define DEADZONE 20
+
+// ===================================
+
+void captureWaveform() {
+  for (int i = 0; i < SAMPLES; i++) {
+    int raw_adc = analogRead(DAC_PIN);
+    // center around 0
+    int centered = raw_adc - CENTER;          // CENTER = ADC_BIAS VOLT 1.67 in analogValue.
+                                              // We use this center to make AC signals. ESP32 ADC
+                                              // can't read negative volt. We create a bias so that
+                                              // the negative volts get positve by substracting the bias
+                                              // thus we can constrain the AC signal in 0 to 4095
+                                              // typically the positve value goes above (4095/2) and negative
+                                              // stays below that value. thus we get a center (4095/2) ~ 2048
+                                              // It can also be called the idle volts reading from ADC. 1950 is
+                                              // in my case.
+
+    if (abs(centered) < DEADZONE) {
+      centered = 0;
+    }
+
+    // software gain
+    centered *= GAIN;
+    // shift back
+    int amplified = centered + CENTER;
+    // clamp
+    samples[i] = constrain(amplified, 0, 4095);
+
+    delayMicroseconds(SAMPLE_DELAY);
+  }
+}
+
+
+void drawMusicVisualizer() {
+  captureWaveform();
+  u8g2.clearBuffer();
+  u8g2.setDrawColor(1);
+  for (int x = 1; x < SAMPLES; x++) {
+    int y1 =  map(samples[x - 1], 0, 4095, 63, 0);
+    int y2 = map(samples[x], 0, 4095, 63, 0);
+  
+    u8g2.drawLine(x-1, y1, x, y2);
+  }
+  u8g2.sendBuffer();
+}
+
+void MUSIC_SCREEN_VISUALIZER_BUTTON_LOGIC(struct Button_struct* Button) {
+  if (Button->btn4 == LOW) {
+    current_scr = MUSIC;
+  }
 }

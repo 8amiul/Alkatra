@@ -5,7 +5,6 @@
 #include <SPI.h>
 #include "SoftwareSerial.h"
 
-
 void setup() {
   Serial.begin(9600);
   softwareSerial.begin(9600);
@@ -15,11 +14,13 @@ void setup() {
   wifi_connect();
   date_allocation();
   BUTTON_SETUP();
+  analogSetPinAttenuation(32, ADC_11db); // 0–3.3V
 }
 
 static unsigned long lastTime = 0;
 static const unsigned long interval = 500;
 char key;
+
 
 void loop() {
   DRAW_SCREEN();
@@ -27,15 +28,18 @@ void loop() {
   get_time();
   musicProgressTimeHandle();
 
+  //captureWaveform();
+  //drawWaveform();
+
   // Loop for blocking function
   unsigned long currentTime = millis();
   if (currentTime - lastTime >= interval) {
     lastTime = currentTime;
     checkMusicDonePlaying();
-    DEBUG_MUSIC();
+    //DEBUG_MUSIC();
     setVolume();
 
-
+    //Serial.println(analogRead(DAC_PIN));
     //myDFPlayer.volume(music_volume);
     //setVolume();
     //musicLoop();
@@ -49,33 +53,4 @@ void loop() {
   //  myDFPlayer.volume(music_volume);
   //}
   
-
-
-
-  if (Serial.available() > 0) {
-  Serial.println("available");
-  key = Serial.read();
-  if (key == 'd') {
-    Serial.println("received d");
-    myDFPlayer.next();
-  }
-  else if (key == 'a') {
-    Serial.println("received a");
-    myDFPlayer.previous();
-  }
-  else if (key == 'p') {
-    Serial.println("received p");
-    myDFPlayer.pause();
-  }
-  else if (key == 'm' && (music_volume+1 < 22)) {
-    Serial.println("received m");
-    music_volume++;
-    myDFPlayer.volume(music_volume);
-  }
-  else if (key == 'n' && (music_volume-1 > DEFAULT_VOLUME-1)) {
-    Serial.println("received n");
-    music_volume--;
-    myDFPlayer.volume(music_volume);
-  }
-}
 }
