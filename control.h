@@ -7,6 +7,7 @@ constexpr uint8_t BUTTON_2 = 26;
 constexpr uint8_t BUTTON_3 = 27;
 constexpr uint8_t BUTTON_4 = 14;
 constexpr uint8_t BUTTON_5 = 13;
+constexpr uint8_t BUTTON_6 = 15;
 
 constexpr uint8_t POTENTIOMETER_PIN = 34;
 constexpr uint16_t POT_MAX = 4095;
@@ -21,12 +22,14 @@ struct Button_struct {
   bool btn3;
   bool btn4;
   bool btn5;
+  bool btn6;
 
   unsigned long lastBtn1Time = 0;
   unsigned long lastBtn2Time = 0;
   unsigned long lastBtn3Time = 0;
   unsigned long lastBtn4Time = 0;
   unsigned long lastBtn5Time = 0;
+  unsigned long lastBtn6Time = 0;
 };
 
 extern int pot_value;

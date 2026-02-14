@@ -43,3 +43,6 @@ enum EQ {NORMAL_EQ, POP_EQ, ROCK_EQ, JAZZ_EQ, CLASSIC_EQ, BASS_EQ, TOTAL_EQ};
 
 void drawMusicVisualizer();
 void MUSIC_SCREEN_VISUALIZER_BUTTON_LOGIC(struct Button_struct* Button);
+
+void drawMusicList(void);
+void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button);

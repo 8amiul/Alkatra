@@ -21,6 +21,7 @@ void DRAW_SCREEN() {
                 drawMusicEQ();
             break;
             case MUSIC_SCREEN_SONG_LIST:
+                drawMusicList();
             break;
             case MUSIC_SCREEN_VISUALIZER:
                 drawMusicVisualizer();
@@ -33,14 +34,14 @@ void DRAW_SCREEN() {
 void DRAW_HOME_UI_TIME(void) {
     /* === time ===*/
     //u8g2.setFont(u8g2_font_haxrcorp4089_tr);
-    u8g2.setFont(u8g2_font_timR14_tr);
+    u8g2.setFont(u8g2_font_NokiaSmallPlain_tf);
     if (isTimeSet)
         u8g2.drawStr(5, 27, timeString);
     else if (isTimeSet == -1) {
         u8g2.drawStr(6, 28, "^_^");
     }
     else
-        u8g2.drawStr(6, 25, "Syncing...");
+        u8g2.drawStr(7, 26, "Syncing...");
 
     // sun & moon
     if (hr >= 5 && hr <= 17)

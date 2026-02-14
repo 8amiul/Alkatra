@@ -38,7 +38,7 @@ void loop() {
     checkMusicDonePlaying();
     //DEBUG_MUSIC();
     setVolume();
-
+    Serial.println(digitalRead(BUTTON_6));
     //Serial.println(analogRead(DAC_PIN));
     //myDFPlayer.volume(music_volume);
     //setVolume();

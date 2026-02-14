@@ -44,3 +44,7 @@ extern const unsigned char image_eq_name_border_bits[] U8X8_PROGMEM;
 extern const unsigned char image_save_button_1_bits[] U8X8_PROGMEM;
 extern const unsigned char image_save_button_hvr_bits[] U8X8_PROGMEM;
 extern const unsigned char image_close_hvr_bits[] U8X8_PROGMEM;
+
+
+// MUSIC_LIST
+extern const unsigned char image_scroll_border_bits[] U8X8_PROGMEM;

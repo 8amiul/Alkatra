@@ -11,7 +11,8 @@ void BUTTON_SETUP() {
   pinMode(BUTTON_3, INPUT_PULLUP);
   pinMode(BUTTON_4, INPUT_PULLUP);
   pinMode(BUTTON_5, INPUT_PULLUP);
-
+  pinMode(BUTTON_6, INPUT_PULLUP);
+  
   //last_pot_value = analogRead(POTENTIOMETER);
   //pinMode(POTENTIOMETER, INPUT);
   analogSetPinAttenuation(POTENTIOMETER_PIN, ADC_11db);
@@ -80,11 +81,12 @@ void BUTTON_LOGIC() {
   Button.btn3 = digitalRead(BUTTON_3);
   Button.btn4 = digitalRead(BUTTON_4);
   Button.btn5 = digitalRead(BUTTON_5);
+  Button.btn6 = digitalRead(BUTTON_6);
 
 
   unsigned long now = millis();
 
-  if ((!Button.btn1 || !Button.btn2 || !Button.btn3 || !Button.btn4 || !Button.btn5) && (now - last >= debounce_delay)) { // and this
+  if ((!Button.btn1 || !Button.btn2 || !Button.btn3 || !Button.btn4 || !Button.btn5 || !Button.btn6) && (now - last >= debounce_delay)) { // and this
 
     switch (current_scr) {
       case HOME: HOME_BUTTON_LOGIC(&Button); break;
@@ -96,6 +98,7 @@ void BUTTON_LOGIC() {
           MUSIC_SCREEN_EQ_BUTTON_LOGIC(&Button);
           break;
         case MUSIC_SCREEN_SONG_LIST:
+          MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(&Button);
           break;
         case MUSIC_SCREEN_VISUALIZER:
           MUSIC_SCREEN_VISUALIZER_BUTTON_LOGIC(&Button);

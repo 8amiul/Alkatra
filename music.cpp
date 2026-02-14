@@ -8,7 +8,7 @@
 #include "songs_list.h"
 #include "functions.h"
 #include "control.h"
-
+#include <math.h>
 /* ------------------- DF Player mini initialization ----------- */
 // Use pins 2 and 3 to communicate with DFPlayer Mini
 
@@ -20,7 +20,7 @@ int select_music_button_pos = 2;      // the default position where the selector
 int TOTAL_MUSIC_BUTTONS = 8;
 
 bool isPaused = -1;
-int currentPlayingMusic = 166;
+int currentPlayingMusic = 1;          // Can't be zero
 int STATE = STOPPED;
 bool isMusicDonePlaying = 0;
 int music_volume = DEFAULT_VOLUME;
@@ -394,7 +394,6 @@ void handleShuffle() {
 
 int checkMusicDonePlaying() {
   int busy_pin = digitalRead(BUSY_PIN);
-  Serial.println(busy_pin);
 
   if (busy_pin == HIGH && STATE == PLAYING) {
     isMusicDonePlaying = 1;
@@ -414,7 +413,6 @@ int checkMusicDonePlaying() {
 
     while (digitalRead(BUSY_PIN) == HIGH);
     musicStartMillis = millis();
-    //STATE = PLAYING;
   }
   else {
     isMusicDonePlaying = 0;
@@ -537,7 +535,7 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
         break;
 
       case LIST:
-        
+        current_scr = MUSIC_SCREEN_SONG_LIST;
         break;
       case EQ:
          current_scr = MUSIC_SCREEN_EQ;
@@ -681,7 +679,7 @@ void MUSIC_SCREEN_EQ_BUTTON_LOGIC(struct Button_struct* Button) {
 //========== Wave visualizer ==========
 #define SAMPLES 128
 #define SAMPLE_DELAY  80
-#define DAC_PIN 32
+#define ADC_PIN 32
 #define CENTER 1950
 #define GAIN 5
 
@@ -695,7 +693,7 @@ int samples[SAMPLES];
 
 void captureWaveform() {
   for (int i = 0; i < SAMPLES; i++) {
-    int raw_adc = analogRead(DAC_PIN);
+    int raw_adc = analogRead(ADC_PIN);
     // center around 0
     int centered = raw_adc - CENTER;          // CENTER = ADC_BIAS VOLT 1.67 in analogValue.
                                               // We use this center to make AC signals. ESP32 ADC
@@ -740,4 +738,164 @@ void MUSIC_SCREEN_VISUALIZER_BUTTON_LOGIC(struct Button_struct* Button) {
   if (Button->btn4 == LOW) {
     current_scr = MUSIC;
   }
+}
+
+int songsToShow = 4;
+int yToAdd = 13;
+int MusicListInitialY = 21;
+
+int MusicList_MusicIndex = 0;
+int MusicList_HighlightIndex = 0;
+
+int songsToShow_initialPos = 0;
+int songsToShow_finalPos = songsToShow;
+
+int SCROLL_SIZE = 10;
+int MusicList_PageCount = 1;
+int MusicList_MaxPage = ceil(SONG_COUNT / songsToShow);
+
+void drawMusicList(void) {
+    u8g2.clearBuffer();
+    u8g2.setFontMode(1);
+    u8g2.setBitmapMode(1);
+    // window-border
+    u8g2.drawFrame(0, 10, 128, 54);
+
+
+    // Layer 2
+    u8g2.setFont(u8g2_font_NokiaSmallPlain_tf);
+
+    size_t MAX_LIST_TITLE_SIZE = 20+3;   // Additional 3 for three dots ...
+    char listTitleBuff[MAX_LIST_TITLE_SIZE+1];
+    for (int i = songsToShow_initialPos, j = 0; i < songsToShow_finalPos, j < songsToShow; i++, j++) {
+      
+      if (strlen(songs[i].title) > 20) {                                                    // Limiting text overflow by using this logic
+        strncpy(listTitleBuff, songs[i].title, MAX_LIST_TITLE_SIZE);
+        
+        listTitleBuff[20] = '.'; listTitleBuff[21] = '.'; listTitleBuff[22] = '.';listTitleBuff[23] = '\0';
+
+        u8g2.drawStr(3, MusicListInitialY+(yToAdd * j), listTitleBuff);
+      }
+      else 
+        u8g2.drawStr(3, MusicListInitialY+(yToAdd * j), songs[i].title);
+    }
+
+    // Select
+    u8g2.setDrawColor(2);
+    u8g2.drawBox(1, 11 + (MusicList_HighlightIndex*13), 118, 13);  // add 13 to Y axis for each index to move 
+
+
+    // scroll
+    //u8g2.drawBox(121, constrain(map(MusicList_PageCount, 1, MusicList_MaxPage, 18, 47), 18, 47), 5, SCROLL_SIZE);
+    u8g2.drawBox(121, constrain(map(songsToShow_finalPos, songsToShow, SONG_COUNT, 18, 46), 18, 46), 5, SCROLL_SIZE);
+
+    // scrollbar-border
+    u8g2.setDrawColor(1);
+    u8g2.drawXBMP(119, 10, 9, 54, image_scroll_border_bits);
+
+
+    u8g2.sendBuffer();
+}
+
+void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button) {
+  if (Button->btn1 == LOW) {
+    MusicList_PageCount--;
+    if (MusicList_PageCount <= 0) {
+      MusicList_PageCount = MusicList_MaxPage;
+    }
+    songsToShow_initialPos = (0 + ((MusicList_PageCount - 1 ) * songsToShow));
+    songsToShow_finalPos = (songsToShow * MusicList_PageCount);
+    songsToShow_finalPos = constrain(songsToShow_finalPos, 4, SONG_COUNT);
+    MusicList_MusicIndex = songsToShow_initialPos;
+    
+        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d\nMusicList_PageCount: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount);
+
+  }
+
+  if (Button->btn2 == LOW) {
+    MusicList_PageCount++;
+    if (MusicList_PageCount > MusicList_MaxPage) {
+      MusicList_PageCount = 1;
+    }
+    songsToShow_initialPos = (0 + ((MusicList_PageCount - 1 ) * songsToShow));
+    songsToShow_finalPos = (songsToShow * MusicList_PageCount);
+    songsToShow_finalPos = constrain(songsToShow_finalPos, 4, SONG_COUNT);
+    MusicList_MusicIndex = songsToShow_initialPos + MusicList_HighlightIndex;
+
+        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d\nMusicList_PageCount: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount);
+
+  }
+
+  if (Button->btn3 == LOW) {
+
+    currentPlayingMusic = MusicList_MusicIndex+1;
+    myDFPlayer.play(currentPlayingMusic);
+
+    musicHasBeenPlayed = 1;
+    isPausedInternal = false;
+    STATE = PLAYING;
+
+    while (digitalRead(BUSY_PIN) == HIGH);
+    musicStartMillis = millis();
+
+    if (isShuffle == 1) {
+      shuffle(playShuffleQueue, SONG_COUNT);
+      shuffleQueueCurrentIndex = 0;
+      shuffleQueueNextIndex = 0;
+    }
+
+  }
+
+  if (Button->btn4 == LOW) {
+    if (MusicList_HighlightIndex == songsToShow-1) {
+      if (MusicList_MusicIndex == SONG_COUNT-1) {
+        MusicList_HighlightIndex = 0;
+        MusicList_MusicIndex = 0;
+        songsToShow_initialPos = 0;
+        songsToShow_finalPos = songsToShow;
+      }
+      else {
+        songsToShow_finalPos++;
+        songsToShow_initialPos++;
+        MusicList_MusicIndex++;
+      }
+    }
+    else {
+      MusicList_HighlightIndex++;
+      MusicList_MusicIndex++;
+    }
+        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d\nMusicList_PageCount: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount);
+  }
+
+  if (Button->btn5 == LOW) {
+    if (MusicList_HighlightIndex == 0) {
+      if (MusicList_MusicIndex == 0) {
+        MusicList_HighlightIndex = songsToShow-1;
+        MusicList_MusicIndex = SONG_COUNT-1;
+        songsToShow_initialPos = SONG_COUNT-songsToShow;
+        songsToShow_finalPos = SONG_COUNT;
+      }
+      else {
+        songsToShow_finalPos--;
+        songsToShow_initialPos--;
+        MusicList_MusicIndex--;
+
+      }
+    }
+    else {
+      MusicList_HighlightIndex--;
+      MusicList_MusicIndex--;  
+    }
+        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d\nMusicList_PageCount: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount);
+  }
+
+  if (Button->btn6 == LOW) {
+    current_scr = MUSIC;
+    MusicList_MusicIndex = 0;
+    MusicList_HighlightIndex = 0;
+
+    songsToShow_initialPos = 0;
+    songsToShow_finalPos = songsToShow;
+  }
+
 }
