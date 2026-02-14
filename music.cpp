@@ -799,31 +799,34 @@ void drawMusicList(void) {
 
 void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button) {
   if (Button->btn1 == LOW) {
-    MusicList_PageCount--;
-    if (MusicList_PageCount <= 0) {
-      MusicList_PageCount = MusicList_MaxPage;
+    if (songsToShow_initialPos <= 0) {
+      songsToShow_initialPos = SONG_COUNT - 4;
+      songsToShow_finalPos = SONG_COUNT;
+      MusicList_HighlightIndex = 0;
+      MusicList_MusicIndex = songsToShow_initialPos;
     }
-    songsToShow_initialPos = (0 + ((MusicList_PageCount - 1 ) * songsToShow));
-    songsToShow_finalPos = (songsToShow * MusicList_PageCount);
-    songsToShow_finalPos = constrain(songsToShow_finalPos, 4, SONG_COUNT);
-    MusicList_MusicIndex = songsToShow_initialPos;
-    
-        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d\nMusicList_PageCount: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount);
+    else {
+      songsToShow_initialPos -= songsToShow;
+      songsToShow_finalPos -= songsToShow;
+      MusicList_MusicIndex = songsToShow_initialPos + MusicList_HighlightIndex;
+    }
+
+    Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d\nMusicList_PageCount: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount);
 
   }
 
   if (Button->btn2 == LOW) {
-    MusicList_PageCount++;
-    if (MusicList_PageCount > MusicList_MaxPage) {
-      MusicList_PageCount = 1;
+    if (songsToShow_finalPos + songsToShow > SONG_COUNT) {
+      songsToShow_initialPos = 0;
+      songsToShow_finalPos = songsToShow;
+      MusicList_HighlightIndex = 0;
+      MusicList_MusicIndex = 0;
     }
-    songsToShow_initialPos = (0 + ((MusicList_PageCount - 1 ) * songsToShow));
-    songsToShow_finalPos = (songsToShow * MusicList_PageCount);
-    songsToShow_finalPos = constrain(songsToShow_finalPos, 4, SONG_COUNT);
-    MusicList_MusicIndex = songsToShow_initialPos + MusicList_HighlightIndex;
-
-        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d\nMusicList_PageCount: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount);
-
+    else {
+      songsToShow_initialPos += songsToShow;
+      songsToShow_finalPos += songsToShow;  
+      MusicList_MusicIndex = songsToShow_initialPos + MusicList_HighlightIndex;    
+    }
   }
 
   if (Button->btn3 == LOW) {

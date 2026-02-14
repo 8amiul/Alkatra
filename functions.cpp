@@ -6,7 +6,8 @@
 #include "esp_system.h"
 
 char* ssid     = "/home/8amiul/";
-char* password = "#1992470";
+char* password = "#1992470";        // Yeahm my actual WiFi password. Don't  waste your time bruteforcing 
+                                    // my accounts. I haven't set this anywhere else
 
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 21600;
