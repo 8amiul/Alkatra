@@ -9,6 +9,12 @@
 #include "functions.h"
 #include "control.h"
 #include <math.h>
+#include <ArduinoJson.h>
+#include <UrlEncode.h>
+#include <string>
+#include <HTTPClient.h>
+//#include <Arduino_JSON.h>
+
 /* ------------------- DF Player mini initialization ----------- */
 // Use pins 2 and 3 to communicate with DFPlayer Mini
 
@@ -92,7 +98,6 @@ void musicProgressTimeHandle() {
 
 
 // ------------------- Title, Album, Artist printing --------------------
-
 unsigned long lastTime_setTrackTitle = 0;
 const unsigned long interval_setTrackTitle = 500;
 
@@ -166,6 +171,7 @@ void setTrackArtist() {
 }
 
 // ------------------------------------------------------------------
+
 
 
 // --------------------- Volume section -----------------------------
@@ -549,12 +555,19 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
     //delay(BUTTON_PRESS_DELAY);
   }
 
+  if (Button->btn4 == LOW) {
+    return;
+  }
+
   if (Button->btn5 == LOW) {
     current_scr = MUSIC_SCREEN_VISUALIZER;
   }
 }
 
 
+
+
+//========== EQ Music ==========
 int MusicEQ_ButtonPos = EQ_SAVE;
 int MusicEQ_EQcount = 0;
 
@@ -673,6 +686,7 @@ void MUSIC_SCREEN_EQ_BUTTON_LOGIC(struct Button_struct* Button) {
     }
   }
 }
+// ===================================
 
 
 
@@ -681,7 +695,8 @@ void MUSIC_SCREEN_EQ_BUTTON_LOGIC(struct Button_struct* Button) {
 #define SAMPLE_DELAY  80
 #define ADC_PIN 32
 #define CENTER 1950
-#define GAIN 5
+//#define GAIN 5
+#define GAIN 4
 
 unsigned long lastSampleTime = 0;
 int sampleIndex = 0;
@@ -689,7 +704,6 @@ int samples[SAMPLES];
 
 #define DEADZONE 20
 
-// ===================================
 
 void captureWaveform() {
   for (int i = 0; i < SAMPLES; i++) {
@@ -739,7 +753,12 @@ void MUSIC_SCREEN_VISUALIZER_BUTTON_LOGIC(struct Button_struct* Button) {
     current_scr = MUSIC;
   }
 }
+// ===================================
 
+
+
+
+//========== Music List ==========
 int songsToShow = 4;
 int yToAdd = 13;
 int MusicListInitialY = 21;
@@ -811,7 +830,7 @@ void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button) {
       MusicList_MusicIndex = songsToShow_initialPos + MusicList_HighlightIndex;
     }
 
-    Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d\nMusicList_PageCount: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount);
+        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d | MusicList_PageCount: %d | CurrentPlayingMusic: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount, currentPlayingMusic);
 
   }
 
@@ -827,6 +846,7 @@ void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button) {
       songsToShow_finalPos += songsToShow;  
       MusicList_MusicIndex = songsToShow_initialPos + MusicList_HighlightIndex;    
     }
+        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d | MusicList_PageCount: %d | CurrentPlayingMusic: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount, currentPlayingMusic);
   }
 
   if (Button->btn3 == LOW) {
@@ -867,7 +887,7 @@ void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button) {
       MusicList_HighlightIndex++;
       MusicList_MusicIndex++;
     }
-        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d\nMusicList_PageCount: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount);
+        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d | MusicList_PageCount: %d | CurrentPlayingMusic: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount, currentPlayingMusic);
   }
 
   if (Button->btn5 == LOW) {
@@ -889,7 +909,7 @@ void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button) {
       MusicList_HighlightIndex--;
       MusicList_MusicIndex--;  
     }
-        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d\nMusicList_PageCount: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount);
+        Serial.printf("MusicList_MusicIndex: %d | MusicList_HighlightIndex: %d | songsToShow_initialPos: %d | songsToShow_finalPos: %d | MusicList_PageCount: %d | CurrentPlayingMusic: %d\n", MusicList_MusicIndex, MusicList_HighlightIndex, songsToShow_initialPos, songsToShow_finalPos, MusicList_PageCount, currentPlayingMusic);
   }
 
   if (Button->btn6 == LOW) {
@@ -902,3 +922,4 @@ void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button) {
   }
 
 }
+// ===================================

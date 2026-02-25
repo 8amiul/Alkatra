@@ -4,7 +4,7 @@
 #include "DFRobotDFPlayerMini.h"
 
 constexpr uint8_t DEFAULT_VOLUME =  8;
-constexpr uint8_t MAX_VOLUME = 22;
+constexpr uint8_t MAX_VOLUME = 30;
 constexpr uint8_t MIN_VOLUME = 0;
 constexpr uint8_t PIN_MP3_TX = 17; // Connects to module's RX 
 constexpr uint8_t PIN_MP3_RX = 16; // Connects to module's TX

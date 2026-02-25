@@ -83,6 +83,12 @@ void BUTTON_LOGIC() {
   Button.btn5 = digitalRead(BUTTON_5);
   Button.btn6 = digitalRead(BUTTON_6);
 
+  if (!Button.btn1) Serial.println(BUTTON_1);
+  if (!Button.btn2) Serial.println(BUTTON_2);
+  if (!Button.btn3) Serial.println(BUTTON_3);
+  if (!Button.btn4) Serial.println(BUTTON_4);
+  if (!Button.btn5) Serial.println(BUTTON_5);
+  if (!Button.btn6) Serial.println(BUTTON_6);
 
   unsigned long now = millis();
 

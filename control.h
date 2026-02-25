@@ -1,13 +1,23 @@
 #pragma once
 #include <Arduino.h>
 
+/*
+constexpr uint8_t BUTTON_1 = 25;  // LEFT
+constexpr uint8_t BUTTON_2 = 26;  // RIGHT
+constexpr uint8_t BUTTON_3 = 27;  // ENTER
+constexpr uint8_t BUTTON_4 = 14;  // DOWN
+constexpr uint8_t BUTTON_5 = 13;  // UP
+constexpr uint8_t BUTTON_6 = 15;  // BACK
+*/
 
-constexpr uint8_t BUTTON_1 = 25;
-constexpr uint8_t BUTTON_2 = 26;
-constexpr uint8_t BUTTON_3 = 27;
-constexpr uint8_t BUTTON_4 = 14;
-constexpr uint8_t BUTTON_5 = 13;
-constexpr uint8_t BUTTON_6 = 15;
+
+constexpr uint8_t BUTTON_1 = 18;  // LEFT
+constexpr uint8_t BUTTON_2 = 26;  // RIGHT
+constexpr uint8_t BUTTON_3 = 27;  // ENTER
+constexpr uint8_t BUTTON_4 = 13;  // DOWN
+constexpr uint8_t BUTTON_5 = 25;  // UP
+constexpr uint8_t BUTTON_6 = 15;  // BACK
+
 
 constexpr uint8_t POTENTIOMETER_PIN = 34;
 constexpr uint16_t POT_MAX = 4095;
