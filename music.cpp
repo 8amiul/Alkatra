@@ -12,7 +12,8 @@
 #include <ArduinoJson.h>
 #include <UrlEncode.h>
 #include <string>
-#include <HTTPClient.h>
+#include <WiFiClientSecure.h>
+
 //#include <Arduino_JSON.h>
 
 /* ------------------- DF Player mini initialization ----------- */
@@ -27,6 +28,7 @@ int TOTAL_MUSIC_BUTTONS = 8;
 
 bool isPaused = -1;
 int currentPlayingMusic = 1;          // Can't be zero
+int prev_music = currentPlayingMusic;
 int STATE = STOPPED;
 bool isMusicDonePlaying = 0;
 int music_volume = DEFAULT_VOLUME;
@@ -70,12 +72,16 @@ void DF_PLAYER_INIT() {
 
   if (myDFPlayer.begin(softwareSerial, true, false)) {
     Serial.println("DF_PLAYER_SOFTWARE_SERIAL_OK");
-    myDFPlayer.volume(music_volume);
     myDFPlayer.EQ(currentEQ);
     //myDFPlayer.enableLoopAll();
 
     for (int i = 0; i < SONG_COUNT; i++) 
       playShuffleQueue[i] = i + 1;
+
+    int map_volume = map(analogRead(POTENTIOMETER_PIN), 0, 4095, MIN_VOLUME, MAX_VOLUME);
+    music_volume = constrain(map_volume, MIN_VOLUME, MAX_VOLUME);
+    myDFPlayer.volume(music_volume);
+
 
   } else {
     Serial.println("Connecting to DFPlayer Mini failed!");
@@ -124,7 +130,7 @@ void setTrackTitle() {
 }
 
 unsigned long lastTime_setTrackAlbum = 0;
-const unsigned long interval_setTrackAlbum = 500;
+const unsigned long interval_setTrackAlbum = 1000;
 
 int albumBuffer_InitialPos = 0;
 const int albumBufferSize = 8;
@@ -148,7 +154,7 @@ void setTrackAlbum() {
 }
 
 unsigned long lastTime_setTrackArtist = 0;
-const unsigned long interval_setTrackArtist = 500;
+const unsigned long interval_setTrackArtist = 1000;
 
 int artistBuffer_InitialPos = 0;
 const int artistBufferSize = 8;
@@ -218,6 +224,7 @@ void setVolume() {
 
 void DRAW_MUSIC_UI(void) {
     u8g2.clearBuffer();
+    DRAW_NAVBAR();
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     // window_border
@@ -419,6 +426,13 @@ int checkMusicDonePlaying() {
 
     while (digitalRead(BUSY_PIN) == HIGH);
     musicStartMillis = millis();
+
+    // Fetching new lyrics
+    if (current_scr == MUSIC_SCREEN_LYRICS) {
+      isGetReq = true;
+      prev_music = currentPlayingMusic;
+    }
+
   }
   else {
     isMusicDonePlaying = 0;
@@ -440,6 +454,8 @@ void setCurrentPlayingMusic(bool incr) {
       currentPlayingMusic--;
   }
 }
+
+
 
 void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
   if (isDFPlayerFailed == 1) return;
@@ -556,11 +572,19 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
   }
 
   if (Button->btn4 == LOW) {
-    return;
+    current_scr = MUSIC_SCREEN_LYRICS;
+    if (prev_music != currentPlayingMusic && musicHasBeenPlayed) {
+      isGetReq = true;
+      prev_music = currentPlayingMusic;
+    }
   }
 
   if (Button->btn5 == LOW) {
     current_scr = MUSIC_SCREEN_VISUALIZER;
+  }
+
+  if (Button->btn6 == LOW) {
+    current_scr = MENU;
   }
 }
 
@@ -573,6 +597,7 @@ int MusicEQ_EQcount = 0;
 
 void drawMusicEQ(void) {
     u8g2.clearBuffer();
+    DRAW_NAVBAR();
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
 
@@ -775,6 +800,7 @@ int MusicList_MaxPage = ceil(SONG_COUNT / songsToShow);
 
 void drawMusicList(void) {
     u8g2.clearBuffer();
+    DRAW_NAVBAR();
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     // window-border
@@ -923,3 +949,274 @@ void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button) {
 
 }
 // ===================================
+
+TaskHandle_t reqTaskHandle = NULL;
+volatile bool taskSuspended = false;
+
+int duration = 243;
+
+char reqUrl[1024];
+char raw_lyrics[4096];
+
+
+const char*  server = "lrclib.net";
+bool isGetReq = false;
+// Music Lyrics
+
+void urlGen() {
+  //char* base = "/api/get?artist_name=Borislav+Slavov&track_name=I+Want+to+Live&album_name=Baldur%27s+Gate+3+(Original+Game+Soundtrack)&duration=233";
+  
+  sprintf(reqUrl, "GET /api/get?artist_name=%s&track_name=%s&album_name=%s&duration=%d HTTP/1.1", urlEncode(songs[currentPlayingMusic-1].artist).c_str(), urlEncode(songs[currentPlayingMusic-1].title).c_str(), urlEncode(songs[currentPlayingMusic-1].album).c_str(), songs[currentPlayingMusic-1].length);
+
+  Serial.println(reqUrl);
+}
+
+void requestTask(void *parameter) {
+  while (true) {
+    // Wait forever for notification
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+    Serial.println("\n[RTOS] Request Triggered");
+
+    WiFiClientSecure localClient;
+    localClient.setInsecure();   // OK for testing
+    localClient.setTimeout(5000);
+
+    if (localClient.connected()) {
+      localClient.stop();
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+
+    if (!localClient.connect(server, 443)) {
+      Serial.println("Connection failed!");
+      continue;
+    }
+
+    Serial.println("Connected!");
+
+    //localClient.println("GET /api/get?artist_name=Borislav+Slavov&track_name=I+Want+to+Live&album_name=Baldur%27s+Gate+3+(Original+Game+Soundtrack)&duration=233 HTTP/1.1");
+    localClient.println(reqUrl);
+    localClient.println("Host: lrclib.net");
+    localClient.println("User-Agent: ESP32");
+    localClient.println("Connection: close");
+    localClient.println();
+
+    unsigned long timeout = millis();
+
+    // Wait for response (max 5 seconds)
+    while (localClient.connected() && !localClient.available()) {
+      if (millis() - timeout > 5000) {
+        Serial.println(">>> Client Timeout !");
+        localClient.stop();
+        return;
+      }
+      vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+
+    /*
+    Serial.println("---- RESPONSE ----");
+
+    while (localClient.available()) {
+      Serial.write(localClient.read());
+    }
+
+    Serial.println("\n---- END ----");
+    */
+
+  char endOfHeaders[] = "\r\n\r\n";
+  if (!localClient.find(endOfHeaders)) {
+    Serial.println(F("Invalid response"));
+    localClient.stop();
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+  }
+  // Allocate the JSON document
+  JsonDocument doc;
+
+  // Parse JSON object
+  DeserializationError error = deserializeJson(doc, localClient);
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    localClient.stop();
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+  }
+
+  // Extract values
+  Serial.println(F("Response:"));
+  //Serial.println(doc["plainLyrics"].as<const char*>());
+
+  if (!doc["syncedLyrics"].isNull()) {
+    strcpy(raw_lyrics, doc["syncedLyrics"].as<const char*>());
+    //Serial.println(raw_lyrics);
+    grabLyrics(raw_lyrics);
+
+
+  }
+  else {
+    Serial.println("No lyrics found");
+  }
+
+  localClient.stop();
+  vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+}
+
+
+
+
+Lyrics* lyrics = NULL;
+int totalLines = 0;
+int lyricsToPrint = -1;
+
+int countLines(const char* data) {
+  int counter = 0;
+  while(*data) {
+    if (*data == '[') {
+      counter++;
+    }
+    data++;
+  }
+  return counter;
+}
+
+unsigned long stringToMillis(const char* lyrics_time_part) {
+  int min, sec, centisec;
+  sscanf(lyrics_time_part, "%d:%d.%d", &min, &sec, &centisec);
+
+  return ((min * 60 * 1000UL) + (sec * 1000UL) + (centisec * 10UL));
+}
+
+void grabLyrics(char* data) {
+  free_grabLyrics();
+
+  Serial.println("Managing lyrics");
+  totalLines = countLines(data);
+  lyrics = (Lyrics*) malloc(sizeof(Lyrics) * totalLines);
+  Serial.println(totalLines);
+  int counter = 0;
+
+  char* line = strtok(data, "\n");
+  while (line != NULL && counter < totalLines) {
+    if (line[0] == '[') {
+      // getting timespan 
+      char timeBuff[10];
+      strncpy(timeBuff, line + 1, 8);
+      timeBuff[8] = '\0';
+
+      unsigned long millis = stringToMillis(timeBuff);
+
+      // getting lyrics
+      char* textInitial = strchr(line, ']');
+      if (textInitial) {
+        textInitial++;
+        while (*textInitial == ' ')
+          textInitial++;
+
+        lyrics[counter].lyrics_string = (char*) malloc(strlen(textInitial) + 1);
+        strcpy(lyrics[counter].lyrics_string, textInitial);
+
+        lyrics[counter].timespan = millis;
+        counter++;
+
+      }
+    }
+
+    line = strtok(NULL, "\n");
+  }
+
+      for (int i = 0; i < totalLines; i++) {
+        Serial.print(lyrics[i].timespan);
+        Serial.print(" -> ");
+        Serial.println(lyrics[i].lyrics_string);
+    }
+}
+
+void free_grabLyrics() {
+  for (int i = 0; i < totalLines; i++) {
+    free(lyrics[i].lyrics_string);
+  }
+  free(lyrics);
+  Serial.println("Memory Freed");
+}
+
+void lyricsTimeCalc() {
+  if (lyrics[lyricsToPrint].timespan == (musicElapsedTime * 1000)) {
+
+  }
+}
+
+void drawMusicLyrics() {
+  u8g2.clearBuffer();
+  //u8g2.setFont(u8g2_font_NokiaSmallPlain_tf); // height 7
+  u8g2.setFontMode(1);
+
+
+  if (lyrics != NULL) {
+    if (lyricsToPrint >= 0)
+      drawWrappedCenteredText(lyrics[lyricsToPrint].lyrics_string);
+  
+    if (lyrics[lyricsToPrint+1].timespan <= (musicElapsedTime * 1000UL)) {
+      lyricsToPrint++;
+    }
+  }
+
+  u8g2.sendBuffer();
+
+}
+
+void MUSIC_SCREEN_LYRICS_BUTTON_LOGIC(struct Button_struct* Button) {
+  if (Button->btn6 == LOW) {
+    current_scr = MUSIC;
+  }
+  if (Button->btn2 == LOW) {
+    lyricsToPrint++;
+  }
+  if (Button->btn1 == LOW) {
+    lyricsToPrint--;
+  }
+}
+
+void drawWrappedCenteredText(const char* str) {
+  const int maxWidth = 128;
+  const int lineHeight = 12;  // depends on font
+  const int maxLines = 10;
+
+  char buffer[200];
+  strncpy(buffer, str, sizeof(buffer));
+  
+  char* word = strtok(buffer, " ");
+  String currentLine = "";
+  String lines[maxLines];
+  int lineCount = 0;
+
+  while (word != NULL) {
+    String testLine = currentLine;
+    if (testLine.length() > 0) testLine += " ";
+    testLine += word;
+
+    if (u8g2.getStrWidth(testLine.c_str()) > maxWidth) {
+      lines[lineCount++] = currentLine;
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+
+    word = strtok(NULL, " ");
+  }
+
+  // Add last line
+  if (currentLine.length() > 0) {
+    lines[lineCount++] = currentLine;
+  }
+
+  // Vertical centering
+  int totalTextHeight = lineCount * lineHeight;
+  int y = (64 - totalTextHeight) / 2 + lineHeight;
+
+  // Draw lines centered
+  for (int i = 0; i < lineCount; i++) {
+    int x = (128 - u8g2.getStrWidth(lines[i].c_str())) / 2;
+    u8g2.drawStr(x, y, lines[i].c_str());
+    y += lineHeight;
+  }
+}

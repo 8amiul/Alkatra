@@ -46,3 +46,22 @@ void MUSIC_SCREEN_VISUALIZER_BUTTON_LOGIC(struct Button_struct* Button);
 
 void drawMusicList(void);
 void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button);
+
+
+struct Lyrics {
+  unsigned long timespan;
+  char* lyrics_string;
+};
+
+extern TaskHandle_t reqTaskHandle;
+extern volatile bool taskSuspended;
+extern bool isGetReq;
+extern int totalLines;
+extern Lyrics* lyrics;
+void requestTask(void *parameter);
+void urlGen();
+void grabLyrics(char* data);
+void free_grabLyrics();
+void drawMusicLyrics();
+void MUSIC_SCREEN_LYRICS_BUTTON_LOGIC(struct Button_struct* Button);
+void drawWrappedCenteredText(const char* str);

@@ -120,3 +120,21 @@ void shuffle(int *array, int n) {
         }
     }
 }
+
+
+
+
+float vsum = 0;
+int vcount = 0;
+float battery_voltage = (batteryPinReading / MAX_PIN_READING) * MAX_PIN_VOLT * BATTERY_VOLT_SMOOTHING_FACTOR * 2;
+
+void setBatteryVoltage() {
+    vsum += battery_voltage;
+    vcount++;
+
+    if (vcount < 100) {
+        vsum += battery_voltage;
+        vcount++;
+    }
+    battery_voltage = vsum / vcount;
+}

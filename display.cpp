@@ -11,7 +11,6 @@ int app_index = 0;
 int app_marker_pos = 0;
 
 void DRAW_SCREEN() {
-    DRAW_NAVBAR();
     switch (current_scr) {
         case HOME: DRAW_HOME_UI(); break;
         case MENU: DRAW_MENU(); break;
@@ -26,9 +25,13 @@ void DRAW_SCREEN() {
             case MUSIC_SCREEN_VISUALIZER:
                 drawMusicVisualizer();
             break;
+            case MUSIC_SCREEN_LYRICS:
+                drawMusicLyrics();
+            break;
 
         default: DRAW_HOME_UI(); break;
     }
+    
 }
 
 void DRAW_HOME_UI_TIME(void) {
@@ -59,23 +62,56 @@ void DRAW_HOME_UI_TIME(void) {
         u8g2.drawStr(5, 51, dateString);
     }
 }
+//String string_to_print = String(batteryPinReading);
+
 
 void DRAW_NAVBAR(void) {
+    
     // HEADPHONE
-    u8g2.drawXBMP(100, 2, 9, 7, image_headphone_bits);
+    if (isDFPlayerFailed == 0)
+        u8g2.drawXBMP(90, 2, 9, 7, image_headphone_bits);
+            
     // BATTERY
+        // battery-charge
+        uint8_t battery_charge_x = 108;
+        battery_voltage = (batteryPinReading / MAX_PIN_READING) * MAX_PIN_VOLT * BATTERY_VOLT_SMOOTHING_FACTOR * 2;    
+        u8g2.setDrawColor(1);
+
+        setBatteryVoltage();
+
+        char buff[10];
+        dtostrf(battery_voltage, 4, 2, buff);
+        u8g2.setFont(u8g2_font_NokiaSmallPlain_tf);
+        u8g2.drawStr(2, 9, buff);
+
+
+        if (battery_voltage >= 4.2) battery_charge_x = 108;
+        else if (battery_voltage < 4.2 && battery_voltage >= 3.95) battery_charge_x = 108;
+        else if (battery_voltage < 3.95 && battery_voltage >= 3.70) battery_charge_x = 116;
+        else if (battery_voltage < 3.70 && battery_voltage >= 3.50) battery_charge_x = 120;
+        else if (battery_voltage < 3.50 && battery_voltage >= 3.25) battery_charge_x = 124;
+        else if (battery_voltage < 3.25) battery_charge_x = 127;
+
+        u8g2.drawBox(battery_charge_x, 3, 20, 5);
+
+        // battery-border
+        u8g2.drawXBMP(105, 2, 23, 7, image_battery_border_bits);
+
     // WIFI
     // BLUETOOTH
     // TIME
+
 }
 
 void DRAW_HOME_UI(void) {
     u8g2.clearBuffer();
+    DRAW_NAVBAR();
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
 
     // window_border
     u8g2.drawFrame(0, 10, 128, 54);
+
 
     // Set the Home UI time, date, day and the sun/moon
     DRAW_HOME_UI_TIME();
@@ -104,6 +140,7 @@ void DRAW_BOOT_LOGO(void) {
 
 void DRAW_MENU(void) {
     u8g2.clearBuffer();
+    DRAW_NAVBAR();
     u8g2.setFontMode(1);
     u8g2.setBitmapMode(1);
     // window_border

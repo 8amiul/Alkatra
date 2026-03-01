@@ -14,7 +14,7 @@ typedef struct {
 #define SONG_COUNT 196
 
 const Song songs[SONG_COUNT] PROGMEM = {
-  { 1, 1, "A Room Up In The Sky (feat. The Marías)", "Eyedress/The Marías", "A Room Up In The Sky (feat. The Marías)", 167 },
+  { 1, 1, "A Room Up In The Sky", "Eyedress/The Marías", "A Room Up In The Sky", 167 },
   { 1, 2, "Afterthought", "Tame Impala", "Deadbeat", 243 },
   { 1, 3, "Amerika", "Rammstein", "Reise, Reise", 258 },
   { 1, 4, "Are You Bored Yet? (feat. Clairo)", "Wallows/Clairo", "Nothing Happens", 206 },

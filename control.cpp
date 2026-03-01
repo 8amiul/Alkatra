@@ -109,7 +109,9 @@ void BUTTON_LOGIC() {
         case MUSIC_SCREEN_VISUALIZER:
           MUSIC_SCREEN_VISUALIZER_BUTTON_LOGIC(&Button);
           break;
-        
+        case MUSIC_SCREEN_LYRICS:
+          MUSIC_SCREEN_LYRICS_BUTTON_LOGIC(&Button);
+          break;      
 
       default: break;
     }
