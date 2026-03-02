@@ -431,6 +431,7 @@ int checkMusicDonePlaying() {
     if (current_scr == MUSIC_SCREEN_LYRICS) {
       isGetReq = true;
       prev_music = currentPlayingMusic;
+      lyricsToPrint = -1;
     }
 
   }
@@ -573,9 +574,13 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
 
   if (Button->btn4 == LOW) {
     current_scr = MUSIC_SCREEN_LYRICS;
-    if (prev_music != currentPlayingMusic && musicHasBeenPlayed) {
+
+    if ((prev_music != currentPlayingMusic || !lyricsFetched) && musicHasBeenPlayed) {
+    //if (!lyricsFetched && musicHasBeenPlayed) {
+      free_grabLyrics();
       isGetReq = true;
       prev_music = currentPlayingMusic;
+      lyricsFetchedFailed = false;
     }
   }
 
@@ -963,6 +968,15 @@ const char*  server = "lrclib.net";
 bool isGetReq = false;
 // Music Lyrics
 
+
+
+Lyrics* lyrics = NULL;
+int totalLines = 0;
+int lyricsToPrint = -1;
+bool lyricsFetched = false;
+bool lyricsFetchedFailed = false;
+
+
 void urlGen() {
   //char* base = "/api/get?artist_name=Borislav+Slavov&track_name=I+Want+to+Live&album_name=Baldur%27s+Gate+3+(Original+Game+Soundtrack)&duration=233";
   
@@ -1050,10 +1064,11 @@ void requestTask(void *parameter) {
     //Serial.println(raw_lyrics);
     grabLyrics(raw_lyrics);
 
-
+    lyricsFetchedFailed = false;
   }
   else {
     Serial.println("No lyrics found");
+    lyricsFetchedFailed = true;
   }
 
   localClient.stop();
@@ -1063,10 +1078,6 @@ void requestTask(void *parameter) {
 
 
 
-
-Lyrics* lyrics = NULL;
-int totalLines = 0;
-int lyricsToPrint = -1;
 
 int countLines(const char* data) {
   int counter = 0;
@@ -1083,11 +1094,12 @@ unsigned long stringToMillis(const char* lyrics_time_part) {
   int min, sec, centisec;
   sscanf(lyrics_time_part, "%d:%d.%d", &min, &sec, &centisec);
 
-  return ((min * 60 * 1000UL) + (sec * 1000UL) + (centisec * 10UL));
+  //return ((min * 60 * 1000UL) + (sec * 1000UL) + (centisec * 10UL));
+  return ((min * 60 * 1000UL) + (sec * 1000UL));
 }
 
 void grabLyrics(char* data) {
-  free_grabLyrics();
+  //free_grabLyrics();
 
   Serial.println("Managing lyrics");
   totalLines = countLines(data);
@@ -1124,11 +1136,13 @@ void grabLyrics(char* data) {
     line = strtok(NULL, "\n");
   }
 
-      for (int i = 0; i < totalLines; i++) {
-        Serial.print(lyrics[i].timespan);
-        Serial.print(" -> ");
-        Serial.println(lyrics[i].lyrics_string);
-    }
+  lyricsFetched = true;
+
+  for (int i = 0; i < totalLines; i++) {
+    Serial.print(lyrics[i].timespan);
+    Serial.print(" -> ");
+    Serial.println(lyrics[i].lyrics_string);
+  }
 }
 
 void free_grabLyrics() {
@@ -1136,12 +1150,25 @@ void free_grabLyrics() {
     free(lyrics[i].lyrics_string);
   }
   free(lyrics);
+  lyrics = NULL;
+  lyricsToPrint = -1;
+  lyricsFetched = false;
   Serial.println("Memory Freed");
 }
 
-void lyricsTimeCalc() {
-  if (lyrics[lyricsToPrint].timespan == (musicElapsedTime * 1000)) {
+void LyricsTimespanHandle() {
+  if (lyrics != NULL && lyricsFetched && STATE == PLAYING) {
+    if (lyricsToPrint < totalLines-1) {
+      if (lyrics[lyricsToPrint+1].timespan <= (musicElapsedTime * 1000UL)) {
+        lyricsToPrint++;
+      }
+    }
+  }
 
+  if (prev_music != currentPlayingMusic || !lyricsFetched) {
+    lyricsToPrint = -1;
+    //lyricsFetchedFailed = false;
+    //free_grabLyrics();
   }
 }
 
@@ -1151,13 +1178,21 @@ void drawMusicLyrics() {
   u8g2.setFontMode(1);
 
 
+
   if (lyrics != NULL) {
     if (lyricsToPrint >= 0)
       drawWrappedCenteredText(lyrics[lyricsToPrint].lyrics_string);
-  
-    if (lyrics[lyricsToPrint+1].timespan <= (musicElapsedTime * 1000UL)) {
-      lyricsToPrint++;
-    }
+    else if (lyricsFetchedFailed == true)
+      u8g2.drawStr(2,10, "Can't get lyrics, sorry :(");
+
+    //Serial.println(lyricsToPrint);
+    //Serial.printf("LyircsTimeSpan: %d | MusicTime: %d\n",lyrics[lyricsToPrint+1].timespan, musicElapsedTime* 1000UL);
+  }
+  else {
+    if (!lyricsFetchedFailed)
+      u8g2.drawStr(2,10, "Fetching lyrics ...");
+    else
+      u8g2.drawStr(2,10, "Can't get lyrics :(");
   }
 
   u8g2.sendBuffer();

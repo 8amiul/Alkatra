@@ -42,7 +42,8 @@ void loop() {
   BUTTON_LOGIC();
   get_time();
   musicProgressTimeHandle();
-
+  LyricsTimespanHandle();
+  
   // Loop for blocking function
   unsigned long currentTime = millis();
   if (currentTime - lastTime >= interval) {
