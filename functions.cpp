@@ -10,7 +10,7 @@
 #include <StreamString.h>
 
 char* ssid     = "/home/8amiul/";
-char* password = "#1992470";        // Yeahm my actual WiFi password. Don't  waste your time bruteforcing 
+char* password = "#1992470";        // Yeah my actual WiFi password. Don't  waste your time bruteforcing 
                                     // my accounts. I haven't set this anywhere else
 
 const char* ntpServer = "pool.ntp.org";
@@ -37,16 +37,45 @@ void setTimeDateString() {
   }
 }
 
+unsigned long prevTimeWiFi = 0;
+unsigned long WIFI_CONNECT_TIMEOUT = 5000;
+bool wifiConnected = false;
+bool isWiFiFound = false;
+
 void wifi_connect(void) {
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  
+  int totalWiFi = WiFi.scanNetworks();
+
+  for (int i = 0; i < totalWiFi; i++) {
+    if (WiFi.SSID(i) == String(ssid)) {
+      Serial.println("Connection found!");
+      isWiFiFound = true;
+      break;
+    }
   }
-  Serial.println("");
-  Serial.println("WiFi connected.");
+
+  if (isWiFiFound) {
+    WiFi.begin(ssid, password);
+    unsigned long currentTimeWiFi = millis();
+
+    while (!(currentTimeWiFi - prevTimeWiFi >= WIFI_CONNECT_TIMEOUT)) {
+      prevTimeWiFi = currentTimeWiFi;
+
+      if (WiFi.status() == WL_CONNECTED) {
+        Serial.println(" ");
+        Serial.printf("%s connected\n", ssid);
+        return;
+      }
+      Serial.print(".");
+      delay(200);
+    }
+  }
+  else {
+    Serial.println("WiFi not found");
+  }    
+  Serial.println("Failed to connect WiFi.");
 }
 
 /*

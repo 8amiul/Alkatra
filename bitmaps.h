@@ -48,3 +48,10 @@ extern const unsigned char image_close_hvr_bits[] U8X8_PROGMEM;
 
 // MUSIC_LIST
 extern const unsigned char image_scroll_border_bits[] U8X8_PROGMEM;
+
+
+
+
+
+extern const unsigned char image_wifi_not_connected_bits[] U8X8_PROGMEM;
+extern const unsigned char image_music_sound_wave_lyrics_bits[] U8X8_PROGMEM;

@@ -18,8 +18,8 @@ void setup() {
   wifi_connect();
   date_allocation();
   BUTTON_SETUP();
-  analogSetPinAttenuation(32, ADC_11db); // 0–3.3V
-
+  analogSetPinAttenuation(32, ADC_11db);
+  
   xTaskCreatePinnedToCore(
     requestTask,
     "RequestTask",

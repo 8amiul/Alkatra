@@ -429,6 +429,7 @@ int checkMusicDonePlaying() {
 
     // Fetching new lyrics
     if (current_scr == MUSIC_SCREEN_LYRICS) {
+      lyricsFetched = false;
       isGetReq = true;
       prev_music = currentPlayingMusic;
       lyricsToPrint = -1;
@@ -575,9 +576,9 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
   if (Button->btn4 == LOW) {
     current_scr = MUSIC_SCREEN_LYRICS;
 
-    if ((prev_music != currentPlayingMusic || !lyricsFetched) && musicHasBeenPlayed) {
+    if ((prev_music != currentPlayingMusic || !lyricsFetched) && musicHasBeenPlayed && WiFi.status() == WL_CONNECTED) {
     //if (!lyricsFetched && musicHasBeenPlayed) {
-      free_grabLyrics();
+      lyricsFetched = false;
       isGetReq = true;
       prev_music = currentPlayingMusic;
       lyricsFetchedFailed = false;
@@ -993,7 +994,7 @@ void requestTask(void *parameter) {
     Serial.println("\n[RTOS] Request Triggered");
 
     WiFiClientSecure localClient;
-    localClient.setInsecure();   // OK for testing
+    localClient.setInsecure(); 
     localClient.setTimeout(5000);
 
     if (localClient.connected()) {
@@ -1069,6 +1070,7 @@ void requestTask(void *parameter) {
   else {
     Serial.println("No lyrics found");
     lyricsFetchedFailed = true;
+    lyricsFetched = false;
   }
 
   localClient.stop();
@@ -1099,7 +1101,7 @@ unsigned long stringToMillis(const char* lyrics_time_part) {
 }
 
 void grabLyrics(char* data) {
-  //free_grabLyrics();
+  free_grabLyrics();
 
   Serial.println("Managing lyrics");
   totalLines = countLines(data);
@@ -1179,20 +1181,32 @@ void drawMusicLyrics() {
 
 
 
-  if (lyrics != NULL) {
-    if (lyricsToPrint >= 0)
-      drawWrappedCenteredText(lyrics[lyricsToPrint].lyrics_string);
-    else if (lyricsFetchedFailed == true)
-      u8g2.drawStr(2,10, "Can't get lyrics, sorry :(");
+  if (lyrics != NULL && lyricsFetchedFailed == false && lyricsFetched) {
+      if (lyricsToPrint >= 0)
+        drawWrappedCenteredText(lyrics[lyricsToPrint].lyrics_string);
+      else {
+        u8g2.setBitmapMode(1);
+        // music_sound_wave
+        u8g2.drawXBMP(40, 15, 34, 32, image_music_sound_wave_lyrics_bits);
+      }
+      //else if (lyricsFetchedFailed == true)
+      //u8g2.drawStr(2,10, "Can't get lyrics, sorry :(");
 
     //Serial.println(lyricsToPrint);
     //Serial.printf("LyircsTimeSpan: %d | MusicTime: %d\n",lyrics[lyricsToPrint+1].timespan, musicElapsedTime* 1000UL);
   }
   else {
-    if (!lyricsFetchedFailed)
-      u8g2.drawStr(2,10, "Fetching lyrics ...");
-    else
-      u8g2.drawStr(2,10, "Can't get lyrics :(");
+    //if (!lyricsFetchedFailed) {
+      if (WiFi.status() != WL_CONNECTED) {
+        u8g2.setBitmapMode(1);
+        // wifi_not_connected
+        u8g2.drawXBMP(45, 16, 38, 32, image_wifi_not_connected_bits);
+      } else if (lyricsFetchedFailed == true) {
+        u8g2.drawStr(2,10, "Can't get lyrics :(");
+      } else {
+        u8g2.drawStr(2,10, "Fetching lyrics ...");
+      }
+    //}
   }
 
   u8g2.sendBuffer();

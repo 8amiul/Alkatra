@@ -40,11 +40,12 @@ void DRAW_HOME_UI_TIME(void) {
     u8g2.setFont(u8g2_font_NokiaSmallPlain_tf);
     if (isTimeSet)
         u8g2.drawStr(5, 27, timeString);
-    else if (isTimeSet == -1) {
-        u8g2.drawStr(6, 28, "^_^");
-    }
     else
         u8g2.drawStr(7, 26, "Syncing...");
+    
+
+    if (isTimeSet == -1)
+        u8g2.drawStr(7, 26, ":(");
 
     // sun & moon
     if (hr >= 5 && hr <= 17)
