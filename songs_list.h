@@ -8,13 +8,13 @@ typedef struct {
   const char* title;
   const char* artist;
   const char* album;
-  uint16_t length; // seconds
+  uint16_t length;
 } Song;
 
-#define SONG_COUNT 196
+#define SONG_COUNT 222
 
 const Song songs[SONG_COUNT] PROGMEM = {
-  { 1, 1, "A Room Up In The Sky", "Eyedress/The Marías", "A Room Up In The Sky", 167 },
+  { 1, 1, "A Room Up In The Sky (feat. The Marías)", "Eyedress/The Marías", "A Room Up In The Sky (feat. The Marías)", 167 },
   { 1, 2, "Afterthought", "Tame Impala", "Deadbeat", 243 },
   { 1, 3, "Amerika", "Rammstein", "Reise, Reise", 258 },
   { 1, 4, "Are You Bored Yet? (feat. Clairo)", "Wallows/Clairo", "Nothing Happens", 206 },
@@ -210,4 +210,30 @@ const Song songs[SONG_COUNT] PROGMEM = {
   { 2, 96, "Wasted Summers", "juju<3", "Wasted Summers", 130 },
   { 2, 97, "i was all over her", "salvia palth", "melanchole", 161 },
   { 2, 98, "7 Weeks & 3 Days", "yungatita", "Over You", 194 },
+  { 3, 1, "The Winner Takes It All", "ABBA", "ABBA Gold", 295 },
+  { 3, 2, "AcTuGmAtU3M..", "AV3RN1X", "AcTuGmAtU3M..", 151 },
+  { 3, 3, "Dream Reference", "Bathrobe", "Blue Drift", 232 },
+  { 3, 4, "Right Thing", "Bayonne", "Right Thing", 222 },
+  { 3, 5, "TRILLIUM HARDTEKK (SLOWED)", "Bearn", "TRILLIUM HARDTEKK", 109 },
+  { 3, 6, "How Deep Is Your Love", "Bee Gees", "Greatest", 245 },
+  { 3, 7, "Moonlight", "CASTLEBEAT", "Stereo", 239 },
+  { 3, 8, "Downy", "Das Kope", "Brutamonte", 173 },
+  { 3, 9, "You Spin Me Round (Like a Record)", "Dead Or Alive", "The Best of Disco", 194 },
+  { 3, 10, "A Man Without Love", "Engelbert Humperdinck", "Engelbert Humperdink - The Greatest Hits And More", 198 },
+  { 3, 11, "Waiting for a Girl like You", "Foreigner", "4 (Expanded)", 292 },
+  { 3, 12, "No Way Back (Ultra Slowed)", "Harpazz", "No Way Back", 387 },
+  { 3, 13, "Again And Again", "Jagged Jaw, Minova", "Again And Again", 222 },
+  { 3, 14, "Free Bird", "Lynyrd Skynyrd", "(Pronounced 'Leh-'Nérd 'Skin-'Nérd)", 558 },
+  { 3, 15, "Shirim", "Melody's Echo Chamber", "Bon Voyage", 286 },
+  { 3, 16, "Hey Kids", "Molina, Late Verlane", "Vanilla Shell", 233 },
+  { 3, 17, "Really Truly", "No Vacation/Okey Dokey", "Really Truly", 209 },
+  { 3, 18, "Scarface (Push It To The Limit)", "Paul Engemann", "Scarface", 191 },
+  { 3, 19, "Illegal", "PinkPantheress", "Fancy That", 149 },
+  { 3, 20, "Tonight", "PinkPantheress", "Tonight", 176 },
+  { 3, 21, "More Than This", "Roxy Music", "The Best Of Roxy Music", 258 },
+  { 3, 22, "#BrooklynBloodPop!", "Syko", "DOGMA", 145 },
+  { 3, 23, "Borderline", "Tame Impala", "The Slow Rush", 237 },
+  { 3, 24, "Even if it's a Lie (I Don't Mind)", "Yndling", "Even if it's a Lie (I Don't Mind)", 239 },
+  { 3, 25, "Duvet", "bôa", "Twilight", 203 },
+  { 3, 26, "Fool's Paradise", "peach tinted", "Cinematic Youth", 260 },
 };

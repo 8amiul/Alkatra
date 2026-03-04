@@ -51,6 +51,7 @@ void loop() {
     checkMusicDonePlaying();
     setVolume();
     batteryPinReading = analogRead(BATTERY_VREAD_PIN);
+    Serial.println(isDFPlayerFailed);
   }
 
   if (isGetReq) {

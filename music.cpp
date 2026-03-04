@@ -412,7 +412,8 @@ int checkMusicDonePlaying() {
     isMusicDonePlaying = 1;
 
     if (isLoop == 1) {
-      myDFPlayer.play(currentPlayingMusic);
+      //myDFPlayer.play(currentPlayingMusic);
+      myDFPlayer.playFolder(songs[currentPlayingMusic-1].folder, songs[currentPlayingMusic-1].track);
     }
     else {
       if (isShuffle != 1) {
@@ -509,8 +510,9 @@ void MUSIC_BUTTON_LOGIC(struct Button_struct* Button) {
         if (isDFPlayerFailed == 1) return;
         if (STATE == STOPPED) {
           musicHasBeenPlayed = 1;
-          myDFPlayer.play(currentPlayingMusic);
-          
+          //myDFPlayer.play(currentPlayingMusic);
+          myDFPlayer.playFolder(songs[currentPlayingMusic-1].folder, songs[currentPlayingMusic-1].track);
+
           while (digitalRead(BUSY_PIN) == HIGH);
           musicStartMillis = millis();
           STATE = PLAYING;
@@ -884,7 +886,8 @@ void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button) {
   if (Button->btn3 == LOW) {
 
     currentPlayingMusic = MusicList_MusicIndex+1;
-    myDFPlayer.play(currentPlayingMusic);
+    //myDFPlayer.play(currentPlayingMusic);
+    myDFPlayer.playFolder(songs[currentPlayingMusic-1].folder, songs[currentPlayingMusic-1].track);
 
     musicHasBeenPlayed = 1;
     isPausedInternal = false;
