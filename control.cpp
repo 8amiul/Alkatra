@@ -2,6 +2,8 @@
 #include <arduino.h>
 #include "display.h"
 #include "music.h"
+#include "game.h"
+#include "keyboard.h"
 
 int last_volume_pot_value;
 void BUTTON_SETUP() {
@@ -60,7 +62,7 @@ void MENU_BUTTON_LOGIC(struct Button_struct* Button) {
 
   if (Button->btn3 == LOW && now - Button->lastBtn3Time >= BUTTON_PRESS_DELAY) {
 
-    if (app_index == MUSIC_APP && isDFPlayerFailed == 1) {
+    if (app_index == MUSIC_ICO && isDFPlayerFailed == 1) {
       Button->lastBtn3Time = now;
       return;
     }
@@ -99,6 +101,7 @@ void BUTTON_LOGIC() {
       
       case MENU: MENU_BUTTON_LOGIC(&Button); break;
       
+      //-------------------------------------------------
       case MUSIC: MUSIC_BUTTON_LOGIC(&Button); break; 
         case MUSIC_SCREEN_EQ:
           MUSIC_SCREEN_EQ_BUTTON_LOGIC(&Button);
@@ -112,10 +115,24 @@ void BUTTON_LOGIC() {
         case MUSIC_SCREEN_LYRICS:
           MUSIC_SCREEN_LYRICS_BUTTON_LOGIC(&Button);
           break;      
+      //-------------------------------------------------
+      
+      case GAMES: GAME_MENU_BUTTON_LOGIC(&Button); break;
 
+      case ESPFETCH: ESPFETCH_BUTTON_LOGIC(&Button); break;
+
+      case SETTINGS: WifiMenu_BUTTON_LOGIC(&Button); break;
+
+      case KEYBOARD: Keyboard_BUTTON_LOGIC(&Button); break;
       default: break;
     }
 
     last = now;
   }
 }
+
+void ESPFETCH_BUTTON_LOGIC(struct Button_struct* Button) {
+  if (Button->btn6 == LOW)
+    current_scr = MENU;
+}
+

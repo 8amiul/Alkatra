@@ -26,6 +26,7 @@ int isTimeSet = 0;
 int hr;
 const char* months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
+int SSID_COUNT;
 
 void setTimeDateString() {
   if (getLocalTime(&timeinfo) && isTimeSet) {
@@ -46,9 +47,9 @@ void wifi_connect(void) {
   Serial.print("Connecting to ");
   Serial.println(ssid);
   
-  int totalWiFi = WiFi.scanNetworks();
+  SSID_COUNT = WiFi.scanNetworks();
 
-  for (int i = 0; i < totalWiFi; i++) {
+  for (int i = 0; i < SSID_COUNT; i++) {
     if (WiFi.SSID(i) == String(ssid)) {
       Serial.println("Connection found!");
       isWiFiFound = true;

@@ -21,7 +21,7 @@ extern const unsigned char image_calculator_bits[] U8X8_PROGMEM;
 extern const unsigned char image_calendar_bits[] U8X8_PROGMEM;
 extern const unsigned char image_clock_alarm_bits[] U8X8_PROGMEM;
 extern const unsigned char image_flower_bits[] U8X8_PROGMEM;
-extern const unsigned char image_light_bits[] U8X8_PROGMEM;
+extern const unsigned char image_menu_settings_gear_bits[] U8X8_PROGMEM;
 extern const unsigned char image_music_bits[] U8X8_PROGMEM;
 extern const unsigned char image_music_sound_wave_bits[] U8X8_PROGMEM;
 extern const unsigned char image_phone_book_open_bits[] U8X8_PROGMEM;
@@ -55,3 +55,8 @@ extern const unsigned char image_scroll_border_bits[] U8X8_PROGMEM;
 
 extern const unsigned char image_wifi_not_connected_bits[] U8X8_PROGMEM;
 extern const unsigned char image_music_sound_wave_lyrics_bits[] U8X8_PROGMEM;
+
+
+extern const unsigned char image_games_bits[] U8X8_PROGMEM;
+
+extern const unsigned char image_esp32_bits[] U8X8_PROGMEM; 

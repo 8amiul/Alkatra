@@ -23,6 +23,7 @@ extern int hr;
 extern int isTimeSet;
 extern const char* months[];
 
+extern int SSID_COUNT;
 
 void shuffle(int *array, int n);
 void wifi_connect(void);

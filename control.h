@@ -46,3 +46,4 @@ extern int pot_value;
 
 void BUTTON_SETUP();
 void BUTTON_LOGIC();
+void ESPFETCH_BUTTON_LOGIC(struct Button_struct* Button);
