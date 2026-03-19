@@ -734,7 +734,7 @@ void MUSIC_SCREEN_EQ_BUTTON_LOGIC(struct Button_struct* Button) {
 #define ADC_PIN 32
 #define CENTER 1950
 //#define GAIN 5
-#define GAIN 4
+#define GAIN 6
 
 unsigned long lastSampleTime = 0;
 int sampleIndex = 0;

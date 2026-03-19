@@ -94,11 +94,18 @@ void DRAW_NAVBAR(void) {
 
         setBatteryVoltage();
 
+        /*
         char buff[10];
-        dtostrf(battery_voltage, 4, 2, buff);
+        dtostrf(battery_voltage, 0, 2, buff);
+        buff[strlen(buff)] = 'V';
+        buff[strlen(buff)+1] = '\0';
+        u8g2.setFont(u8g2_font_NokiaSmallPlain_tf);
+        u8g2.drawStr(2, 9, buff); */
+
+        char buff[10];
+        snprintf(buff, sizeof(buff), "%.2fV", battery_voltage);
         u8g2.setFont(u8g2_font_NokiaSmallPlain_tf);
         u8g2.drawStr(2, 9, buff);
-
 
         if (battery_voltage >= 4.2) battery_charge_x = 108;
         else if (battery_voltage < 4.2 && battery_voltage >= 3.95) battery_charge_x = 108;
