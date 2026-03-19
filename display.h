@@ -27,3 +27,5 @@ void DRAW_NAVBAR(void);
 void DRAW_ESPfetch(void);
 void drawWifiMenu(void);
 void WifiMenu_BUTTON_LOGIC(struct Button_struct* Button);
+
+extern int WifiMenu_ssidIndex;

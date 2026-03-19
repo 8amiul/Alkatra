@@ -383,14 +383,19 @@ void DRAW_MUSIC_UI(void) {
 
 void handleShuffle() {
   if (shuffleQueueCurrentIndex == 0 && shuffleQueueNextIndex == 0) {
-    myDFPlayer.play(playShuffleQueue[shuffleQueueCurrentIndex]);
+    //myDFPlayer.play(playShuffleQueue[shuffleQueueCurrentIndex]);
+    
+    myDFPlayer.playFolder(songs[playShuffleQueue[shuffleQueueCurrentIndex]-1].folder, songs[playShuffleQueue[shuffleQueueCurrentIndex]-1].track);
     shuffleQueueNextIndex++;
     currentPlayingMusic = playShuffleQueue[shuffleQueueCurrentIndex];
     //Serial.printf("Playing Music: %d\n", playShuffleQueue[shuffleQueueCurrentIndex]);
   }
   else { 
     shuffleQueueCurrentIndex = shuffleQueueNextIndex;
-    myDFPlayer.play(playShuffleQueue[shuffleQueueCurrentIndex]);
+    
+    //myDFPlayer.play(playShuffleQueue[shuffleQueueCurrentIndex]);
+    
+    myDFPlayer.playFolder(songs[playShuffleQueue[shuffleQueueCurrentIndex]-1].folder, songs[playShuffleQueue[shuffleQueueCurrentIndex]-1].track);
     //Serial.printf("Playing Music: %d | Next music: %d\n", playShuffleQueue[shuffleQueueCurrentIndex], playShuffleQueue[shuffleQueueCurrentIndex+1]);
     currentPlayingMusic = playShuffleQueue[shuffleQueueCurrentIndex];
     if (shuffleQueueNextIndex+1 >= SONG_COUNT) {
@@ -949,11 +954,11 @@ void MUSIC_SCREEN_SONG_LIST_BUTTON_LOGIC(struct Button_struct* Button) {
 
   if (Button->btn6 == LOW) {
     current_scr = MUSIC;
-    MusicList_MusicIndex = 0;
-    MusicList_HighlightIndex = 0;
+    //MusicList_MusicIndex = 0;
+    //MusicList_HighlightIndex = 0;
 
-    songsToShow_initialPos = 0;
-    songsToShow_finalPos = songsToShow;
+    //songsToShow_initialPos = 0;
+    //songsToShow_finalPos = songsToShow;
   }
 
 }

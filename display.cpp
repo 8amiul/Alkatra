@@ -247,7 +247,7 @@ int ssidToShow = 4;
 int WifiMenuYtoAdd = 13;
 int SSIDListInitialY = 21;
 
-int WifiMenu_MusicIndex = 0;
+int WifiMenu_ssidIndex = 0;
 int WifiMenu_HighlightIndex = 0;
 
 int ssidToShow_initialPos = 0;
@@ -258,6 +258,7 @@ int WifiMenu_PageCount = 1;
 int WifiMenu_MaxPage = ceil(SSID_COUNT / ssidToShow);
 unsigned long  Wifiprev = 0;
 unsigned long WifiInterval = 1000;
+
 
 void drawWifiMenu(void) {
     u8g2.clearBuffer();
@@ -318,12 +319,12 @@ void WifiMenu_BUTTON_LOGIC(struct Button_struct* Button) {
       ssidToShow_initialPos = SSID_COUNT - 4;
       ssidToShow_finalPos = SSID_COUNT;
       WifiMenu_HighlightIndex = 0;
-      WifiMenu_MusicIndex = ssidToShow_initialPos;
+      WifiMenu_ssidIndex = ssidToShow_initialPos;
     }
     else {
       ssidToShow_initialPos -= ssidToShow;
       ssidToShow_finalPos -= ssidToShow;
-      WifiMenu_MusicIndex = ssidToShow_initialPos + WifiMenu_HighlightIndex;
+      WifiMenu_ssidIndex = ssidToShow_initialPos + WifiMenu_HighlightIndex;
     }
 
     }
@@ -333,12 +334,12 @@ void WifiMenu_BUTTON_LOGIC(struct Button_struct* Button) {
       ssidToShow_initialPos = 0;
       ssidToShow_finalPos = ssidToShow;
       WifiMenu_HighlightIndex = 0;
-      WifiMenu_MusicIndex = 0;
+      WifiMenu_ssidIndex = 0;
     }
     else {
       ssidToShow_initialPos += ssidToShow;
       ssidToShow_finalPos += ssidToShow;  
-      WifiMenu_MusicIndex = ssidToShow_initialPos + WifiMenu_HighlightIndex;    
+      WifiMenu_ssidIndex = ssidToShow_initialPos + WifiMenu_HighlightIndex;    
     }
   }
 
@@ -349,48 +350,48 @@ void WifiMenu_BUTTON_LOGIC(struct Button_struct* Button) {
 
   if (Button->btn4 == LOW) {
     if (WifiMenu_HighlightIndex == ssidToShow-1) {
-      if (WifiMenu_MusicIndex == SSID_COUNT-1) {
+      if (WifiMenu_ssidIndex == SSID_COUNT-1) {
         WifiMenu_HighlightIndex = 0;
-        WifiMenu_MusicIndex = 0;
+        WifiMenu_ssidIndex = 0;
         ssidToShow_initialPos = 0;
         ssidToShow_finalPos = ssidToShow;
       }
       else {
         ssidToShow_finalPos++;
         ssidToShow_initialPos++;
-        WifiMenu_MusicIndex++;
+        WifiMenu_ssidIndex++;
       }
     }
     else {
       WifiMenu_HighlightIndex++;
-      WifiMenu_MusicIndex++;
+      WifiMenu_ssidIndex++;
     }
   }
 
   if (Button->btn5 == LOW) {
     if (WifiMenu_HighlightIndex == 0) {
-      if (WifiMenu_MusicIndex == 0) {
+      if (WifiMenu_ssidIndex == 0) {
         WifiMenu_HighlightIndex = ssidToShow-1;
-        WifiMenu_MusicIndex = SSID_COUNT-1;
+        WifiMenu_ssidIndex = SSID_COUNT-1;
         ssidToShow_initialPos = SSID_COUNT-ssidToShow;
         ssidToShow_finalPos = SSID_COUNT;
       }
       else {
         ssidToShow_finalPos--;
         ssidToShow_initialPos--;
-        WifiMenu_MusicIndex--;
+        WifiMenu_ssidIndex--;
 
       }
     }
     else {
       WifiMenu_HighlightIndex--;
-      WifiMenu_MusicIndex--;  
+      WifiMenu_ssidIndex--;  
     }
   }
 
   if (Button->btn6 == LOW) {
     current_scr = MENU;
-    WifiMenu_MusicIndex = 0;
+    WifiMenu_ssidIndex = 0;
     WifiMenu_HighlightIndex = 0;
 
     ssidToShow_initialPos = 0;

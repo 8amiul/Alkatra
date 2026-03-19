@@ -7,8 +7,6 @@
 #include <WiFi.h>
 
 
-
-
 void setup() {
   Serial.begin(9600);
   softwareSerial.begin(9600);
@@ -29,11 +27,15 @@ void setup() {
     &reqTaskHandle,
     0
   );
+
 }
 
 static unsigned long lastTime = 0;
 static const unsigned long interval = 500;
 char key;
+
+
+
 
 int batteryPinReading = 0;
 
@@ -52,6 +54,9 @@ void loop() {
     setVolume();
     batteryPinReading = analogRead(BATTERY_VREAD_PIN);
     Serial.println(isDFPlayerFailed);
+
+
+
   }
 
   if (isGetReq) {

@@ -1,6 +1,7 @@
 #include "display.h"
 #include "control.h"
 #include "keyboard.h"
+#include "WiFi.h"
 
 static const unsigned char image___2_bits[] = {0xff,0xff,0x01,0x80,0x01,0x80,0x01,0x80,0x01,0x80,0x81,0x81,0x81,0x81,0x01,0x80,0x01,0x80,0x01,0x80,0x01,0x80,0xff,0xff};
 static const unsigned char image_backspace_bits[] = {0xff,0xff,0x7f,0x01,0x00,0x40,0x01,0x00,0x40,0x01,0x44,0x40,0x01,0x36,0x40,0x01,0x1f,0x40,0x01,0x06,0x40,0x01,0x04,0x40,0x01,0x00,0x40,0x01,0x00,0x40,0xff,0xff,0x7f};
@@ -232,6 +233,23 @@ void Keyboard_BUTTON_LOGIC(struct Button_struct* Button) {
                 p++;
                 *p = '\0';
                 Serial.println(keyboardBuffer);
+                switch (prev_scr) {
+                    case SETTINGS:
+                    if (WiFi.status() == WL_CONNECTED)
+                        WiFi.disconnect();
+                        Serial.println(WiFi.SSID(WifiMenu_ssidIndex));
+                        if (WiFi.begin(WiFi.SSID(WifiMenu_ssidIndex), keyboardBuffer) == WL_CONNECTED) {
+                            u8g2.println("Connected");
+                            
+                            Serial.println("Connected");
+                            u8g2.sendBuffer();
+                        }
+                        p = &keyboardBuffer[0];
+                        memset(keyboardBuffer, 0, sizeof(keyboardBuffer));                        
+                        current_scr = prev_scr;
+                        prev_scr = KEYBOARD;
+                    default: break;
+                }
                 break;
             case BACKSPACE:
                 if (strlen(keyboardBuffer) > 0) {
