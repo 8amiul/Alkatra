@@ -59,4 +59,12 @@ extern const unsigned char image_music_sound_wave_lyrics_bits[] U8X8_PROGMEM;
 
 extern const unsigned char image_games_bits[] U8X8_PROGMEM;
 
-extern const unsigned char image_esp32_bits[] U8X8_PROGMEM; 
+extern const unsigned char image_esp32_bits[] U8X8_PROGMEM;
+
+
+
+// WIFI
+
+extern const unsigned char image_wifi_50_bits[];
+extern const unsigned char image_wifi_75_bits[];
+extern const unsigned char image_wifi_full_bits[];

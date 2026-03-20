@@ -1,13 +1,13 @@
+#include "wifi_manager.h"
 #include "functions.h"
-#include <WiFi.h>
 #include "time.h"
 #include "SoftwareSerial.h"
 #include <stddef.h>
 #include "esp_system.h"
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
-#include <Arduino.h>
 #include <StreamString.h>
+
 
 char* ssid     = "/home/8amiul/";
 char* password = "#1992470";        // Yeah my actual WiFi password. Don't  waste your time bruteforcing 

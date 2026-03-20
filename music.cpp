@@ -12,6 +12,7 @@
 #include <ArduinoJson.h>
 #include <UrlEncode.h>
 #include <string>
+#include "wifi_manager.h"
 #include <WiFiClientSecure.h>
 
 //#include <Arduino_JSON.h>

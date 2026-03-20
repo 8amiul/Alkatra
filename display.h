@@ -4,11 +4,12 @@
 
 extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 
-enum screens {HOME, MENU, MUSIC, CALC, GAMES, CAL, ESPFETCH, FQGEN, BOOK, SETTINGS, KEYBOARD};
-enum icon {MUSIC_ICO, CALC_ICO, GAMES_ICO, CAL_ICO, ESPFETCH_ICO, FQGEN_ICO, BOOK_ICO, SETTINGS_ICO};
+enum screens {HOME, MENU, MUSIC, CALC, GAMES, CAL, ESPFETCH, FQGEN, BOOK, WIFI, KEYBOARD};
+enum icon {MUSIC_ICO, CALC_ICO, GAMES_ICO, CAL_ICO, ESPFETCH_ICO, FQGEN_ICO, BOOK_ICO, WIFI_ICO};
 
 enum MUSIC_SCREENS {MUSIC_SCREEN_SONG_LIST =  20, MUSIC_SCREEN_EQ, MUSIC_SCREEN_VISUALIZER, MUSIC_SCREEN_LYRICS};
 enum GAME_SCREENS {SNAKE = 30, BRICBREK, TETR, AIRSTRIKE};
+enum WIFI_SCREENS {WIFI_CONNECTED = 40};
 
 extern int current_scr;
 extern int total_apps;
@@ -27,5 +28,7 @@ void DRAW_NAVBAR(void);
 void DRAW_ESPfetch(void);
 void drawWifiMenu(void);
 void WifiMenu_BUTTON_LOGIC(struct Button_struct* Button);
+
+void drawCenteredStr(int y, const char *str);
 
 extern int WifiMenu_ssidIndex;

@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <Arduino.h>
 
+
+
 extern char* ssid;
 extern char* password;
 

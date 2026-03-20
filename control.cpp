@@ -4,6 +4,7 @@
 #include "music.h"
 #include "game.h"
 #include "keyboard.h"
+#include "wifi_manager.h"
 
 int last_volume_pot_value;
 void BUTTON_SETUP() {
@@ -121,8 +122,11 @@ void BUTTON_LOGIC() {
 
       case ESPFETCH: ESPFETCH_BUTTON_LOGIC(&Button); break;
 
-      case SETTINGS: WifiMenu_BUTTON_LOGIC(&Button); break;
-
+      case WIFI: WifiMenu_BUTTON_LOGIC(&Button); break;
+        case WIFI_CONNECTED:
+          drawConnectedWifi_BUTTON_LOGIC(&Button);
+        break;
+        
       case KEYBOARD: Keyboard_BUTTON_LOGIC(&Button); break;
       default: break;
     }
