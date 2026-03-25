@@ -20,7 +20,7 @@ void setup() {
   BUTTON_SETUP();
   analogSetPinAttenuation(32, ADC_11db);
   
-  //ledcSetup(0, 2000, 8);     // frequency, resolution
+  ledcSetup(0, 2000, 8);     // frequency, resolution
   ledcAttachPin(12, 0);
 
   xTaskCreatePinnedToCore(
@@ -32,18 +32,6 @@ void setup() {
     &reqTaskHandle,
     0
   );
-
-  /*
-  for (int t = -50; t >= 50; t+= 0.5) {
-        float freq = 440 + 200 * tan(t);
-    //float val = pow(t, 2) - 1;
-    //if (val < 0) val = 0; // Prevent NaN errors
-    //float freq = 440 + sqrt(val);
-    ledcWriteTone(0, abs(freq));
-    
-    t += 1;
-    Serial.printf("t: %f, freq: %f\n", t, freq);
-  }*/
 }
 
 static unsigned long lastTime = 0;
@@ -67,13 +55,12 @@ void loop() {
   unsigned long currentTime = millis();
   if (currentTime - lastTime >= interval) {
     lastTime = currentTime;
+
     checkMusicDonePlaying();
-    setVolume();
+    if (current_scr != EQnGEN)
+      setVolume();
     batteryPinReading = analogRead(BATTERY_VREAD_PIN);
     Serial.println(isDFPlayerFailed);
-
-
-
   }
 
   if (isGetReq) {
@@ -81,8 +68,4 @@ void loop() {
     urlGen();
     xTaskNotifyGive(reqTaskHandle);
   }
-
-
-
-  
 }

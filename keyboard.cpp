@@ -2,7 +2,7 @@
 #include "control.h"
 #include "keyboard.h"
 #include "wifi_manager.h"
-
+#include "graph.h"
 
 static const unsigned char image___2_bits[] = {0xff,0xff,0x01,0x80,0x01,0x80,0x01,0x80,0x01,0x80,0x81,0x81,0x81,0x81,0x01,0x80,0x01,0x80,0x01,0x80,0x01,0x80,0xff,0xff};
 static const unsigned char image_backspace_bits[] = {0xff,0xff,0x7f,0x01,0x00,0x40,0x01,0x00,0x40,0x01,0x44,0x40,0x01,0x36,0x40,0x01,0x1f,0x40,0x01,0x06,0x40,0x01,0x04,0x40,0x01,0x00,0x40,0x01,0x00,0x40,0xff,0xff,0x7f};
@@ -76,8 +76,10 @@ void drawKeyboard(void) {
     u8g2.setFont(u8g2_font_NokiaSmallPlain_tf);
     u8g2.drawBox(u8g2.getStrWidth(keyboardBuffer+pointer_x)+5, 5, 3, 6);
 
+
+
     if (strlen(keyboardBuffer))
-        u8g2.drawStr(4, 11, keyboardBuffer);
+        u8g2.drawStr(4, 12, keyboardBuffer);
 
     // select_hvr
     drawSelectHoverKeyboard();
@@ -234,6 +236,7 @@ void Keyboard_BUTTON_LOGIC(struct Button_struct* Button) {
                 p++;
                 *p = '\0';
                 Serial.println(keyboardBuffer);
+
                 switch (prev_scr) {
                     case WIFI:
                     if (WiFi.status() == WL_CONNECTED)
@@ -249,13 +252,34 @@ void Keyboard_BUTTON_LOGIC(struct Button_struct* Button) {
                         memset(keyboardBuffer, 0, sizeof(keyboardBuffer));                        
                         current_scr = prev_scr;
                         prev_scr = KEYBOARD;
+                        break;
+
+                    case EQnGEN:
+                        vars[0] = {"x", &t};
+                        expr = te_compile(keyboardBuffer, vars, 1, &tinyexpr_error);
+                        if (tinyexpr_error == 0) {
+                            prev_scr = KEYBOARD;
+                            current_scr = EQnGEN;
+                        }
                     default: break;
                 }
+
                 break;
             case BACKSPACE:
                 if (strlen(keyboardBuffer) > 0) {
-                    p--;
-                    *p = '\0';
+                    //p--;
+                    //*p = '\0';
+                    
+
+                    if (p > start_p) {
+                        p--;   
+
+                        char *shift = p;
+                        while (*shift) {
+                            *shift = *(shift + 1);
+                            shift++;
+                        }
+                    }
                     Serial.println(keyboardBuffer);
                 }
                 break;
@@ -288,8 +312,19 @@ void Keyboard_BUTTON_LOGIC(struct Button_struct* Button) {
                 }
                 break;
             default:
+                //*p = keyboard[row].keys[col];
+                //charBuff[0] = keyboard[row].keys[col]; charBuff[1] = '\0';
+                //p++;
+
+                char *shift = p;
+                while (*shift) shift++;   // go to end
+
+                while (shift >= p) {
+                    *(shift + 1) = *shift;  // shift right
+                    shift--;
+                }
+
                 *p = keyboard[row].keys[col];
-                charBuff[0] = keyboard[row].keys[col]; charBuff[1] = '\0';
                 p++;
         }
     }
