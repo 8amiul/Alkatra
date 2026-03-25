@@ -5,8 +5,10 @@
 #include "game.h"
 #include "keyboard.h"
 #include "wifi_manager.h"
+#include "graph.h"
 
 int last_volume_pot_value;
+int last_zoom_pot_value;
 void BUTTON_SETUP() {
   // Setting button output to INPUT_PULLOUT
   pinMode(BUTTON_1, INPUT_PULLUP);
@@ -128,6 +130,8 @@ void BUTTON_LOGIC() {
         break;
         
       case KEYBOARD: Keyboard_BUTTON_LOGIC(&Button); break;
+
+      case EQnGEN: drawEQnGen_BUTTON_LOGIC(&Button); break;
       default: break;
     }
 

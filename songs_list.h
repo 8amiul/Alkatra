@@ -11,9 +11,9 @@ typedef struct {
   uint16_t length;
 } Song;
 
-#define SONG_COUNT 222
+#define SONG_COUNT 264
 
-const Song songs[SONG_COUNT] PROGMEM = {
+const Song songs[SONG_COUNT] PROGMEM =  {
   { 1, 1, "A Room Up In The Sky (feat. The Marías)", "Eyedress/The Marías", "A Room Up In The Sky (feat. The Marías)", 167 },
   { 1, 2, "Afterthought", "Tame Impala", "Deadbeat", 243 },
   { 1, 3, "Amerika", "Rammstein", "Reise, Reise", 258 },
@@ -236,4 +236,46 @@ const Song songs[SONG_COUNT] PROGMEM = {
   { 3, 24, "Even if it's a Lie (I Don't Mind)", "Yndling", "Even if it's a Lie (I Don't Mind)", 239 },
   { 3, 25, "Duvet", "bôa", "Twilight", 203 },
   { 3, 26, "Fool's Paradise", "peach tinted", "Cinematic Youth", 260 },
+  { 4, 1, "Loverboy", "A-Wall", "Loverboy (San Holo Version)", 224 },
+  { 4, 2, "Tek It", "Cafuné", "Running", 191 },
+  { 4, 3, "Each Time You Fall in Love", "Cigarettes After Sex", "Cigarettes After Sex", 290 },
+  { 4, 4, "Flash", "Cigarettes After Sex", "Cigarettes After Sex", 274 },
+  { 4, 5, "John Wayne", "Cigarettes After Sex", "Cigarettes After Sex", 258 },
+  { 4, 6, "K.", "Cigarettes After Sex", "K.", 319 },
+  { 4, 7, "Opera House", "Cigarettes After Sex", "Cigarettes After Sex", 365 },
+  { 4, 8, "Sunsetz", "Cigarettes After Sex", "Cigarettes After Sex", 214 },
+  { 4, 9, "Sweet", "Cigarettes After Sex", "Cigarettes After Sex", 292 },
+  { 4, 10, "Truly", "Cigarettes After Sex", "Cigarettes After Sex", 244 },
+  { 4, 11, "Young & Dumb", "Cigarettes After Sex", "Cigarettes After Sex", 273 },
+  { 4, 12, "I Love You So (Slowed)", "Decaying", "I Love You So", 273 },
+  { 4, 13, "Careless Whisper", "George Michael", "Ladies & Gentlemen", 300 },
+  { 4, 14, "Harvey", "Her's", "Invitation to Her's", 211 },
+  { 4, 15, "As Always", "Hibou", "Halve", 220 },
+  { 4, 16, "Mannequin Love", "Justice/ The Flints", "Hyperdrama", 207 },
+  { 4, 17, "Fade", "Launder", "Pink Cloud", 203 },
+  { 4, 18, "Was It Something I Said", "Mykey", "Was It Something I Said", 220 },
+  { 4, 19, "Cricket Songs", "Phantom Handshakes", "Cricket Songs", 230 },
+  { 4, 20, "AMAZING", "Rex Orange County", "AMAZING", 209 },
+  { 4, 21, "Television / So Far So Good", "Rex Orange County", "Apricot Princess", 262 },
+  { 4, 22, "cindy", "Sara Devoe, Charms", "cindy", 203 },
+  { 4, 23, "Eventually", "Tame Impala", "Eventually", 319 },
+  { 4, 24, "Gossip", "Tame Impala", "Currents", 55 },
+  { 4, 25, "Let It Happen", "Tame Impala", "Currents", 467 },
+  { 4, 26, "New Person, Same Old Mistakes", "Tame Impala", "Currents", 363 },
+  { 4, 27, "The Less I Know The Better", "Tame Impala", "Currents", 218 },
+  { 4, 28, "Yes I'm Changing", "Tame Impala", "Currents", 270 },
+  { 4, 29, "Her", "The American Dawn", "Her", 214 },
+  { 4, 30, "Reflections", "The Neighbourhood", "Hard To Imagine The Neighbourhood Ever Changing", 244 },
+  { 4, 31, "Softcore", "The Neighbourhood", "Hard To Imagine The Neighbourhood Ever Changing", 206 },
+  { 4, 32, "You Get Me So High", "The Neighbourhood", "Hard To Imagine The Neighbourhood Ever Changing", 153 },
+  { 4, 33, "After Hours", "The Weeknd", "After Hours", 361 },
+  { 4, 34, "Alone Again", "The Weeknd", "After Hours", 250 },
+  { 4, 35, "Blinding Lights", "The Weeknd", "After Hours", 200 },
+  { 4, 36, "Hardest To Love", "The Weeknd", "After Hours", 211 },
+  { 4, 37, "Heartless", "The Weeknd", "After Hours", 198 },
+  { 4, 38, "I Was Never There", "The Weeknd/Gesaffelstein", "My Dear Melancholy,", 241 },
+  { 4, 39, "In Your Eyes", "The Weeknd", "After Hours", 237 },
+  { 4, 40, "Missed You", "The Weeknd", "After Hours (Deluxe)", 144 },
+  { 4, 41, "Save Your Tears", "The Weeknd", "After Hours", 215 },
+  { 4, 42, "Too Late", "The Weeknd", "After Hours", 239 },
 };

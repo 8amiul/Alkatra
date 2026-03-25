@@ -5,6 +5,7 @@
 #include "game.h"
 #include "keyboard.h"
 #include "wifi_manager.h"
+#include "graph.h"
 
 //#include "snake.h"
 
@@ -46,6 +47,8 @@ void DRAW_SCREEN() {
                 drawConnectedWifi();
             break;
         case KEYBOARD: drawKeyboard(); break;
+
+        case EQnGEN: drawEQnGEN(); break;
 
         default: DRAW_HOME_UI(); break;
     }
